@@ -2,7 +2,7 @@ Introducing SPAN: My First Encryption Algorithm - Joshua Loysch
 
 SPAN is a cool little encryption algorithm that takes a bit of a different approach to encrypting data. 
 
-You can enter a plaintext phrase such as hello and receive a cipher. Working exapmle:
+You can enter a plaintext phrase such as hello and receive a cipher. Working example:
 
 > 'hello'
 
