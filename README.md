@@ -11,3 +11,7 @@ In this system, 'hello' can be expressed as '143.1871A78.62515A263.7692A140.9315
 THERE ARE *MULTIPLE* ways to represent the same expression as well.
 
 THERE ARE *BOTH* Reversible and Irreversible ciphers this algorithm can generate.
+
+This is the first working version, a little idea I have had for a while that I wanted to get coded up. I am excited to see how this goes :)
+
+Theoretically this could have a complexity of 2^129 + 3.194e38 so it's surprisingly secure for such a simple approach. 
