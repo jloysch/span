@@ -2,6 +2,10 @@
 >
 > LATER - Planning to Daisy-Chain/Cascade multiple SPANS for each character of a phrase to add further complexity and safety. e.g. HELLLO BECOMES 23.2308Asdf...99.9843B.. and so on, each previous block having a key for the next block and the resulting blocks having start/end and ratios as functions of
 > each previous block. Planning to implement this exciting idea later.
+>
+> I imagine a phrase such as password spread out across 8 spans would be hard to find, you would need to know the degree, the ratio, the start/end to the first block, AND what you're looking for to be sure. This is just for the first one if we shuffle. If we take this up a notch and
+> chain SPANs then we can add extreme complexity from a simple password encrypted in this medium- there will be a sea of data to look at and it's all plaintext. I would love to add hotwords in the pre/postamble (see website for terminology) to attract would-be attackers to believing they've decrypted the blocks
+> when in fact they haven't.
 
 Introducing SPAN: My First Encryption Algorithm - Joshua Loysch
 
