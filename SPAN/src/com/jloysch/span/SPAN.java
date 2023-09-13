@@ -1,5 +1,9 @@
 package com.jloysch.span;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
 /*
  * @Author: Joshua Loysch
  * All Rights Reserved
@@ -31,6 +35,7 @@ package com.jloysch.span;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SPAN {
 	
@@ -112,7 +117,7 @@ public class SPAN {
 		return num;
 	}
 	
-	private static void make_triangle() {
+	private static void make_triangle() { //TODO Complete later
 		
 	}
 	
@@ -886,13 +891,14 @@ public class SPAN {
 	}
 	
 	/*
-	 * MAIN ENTRY POINT FOR PROGRAM
+	 * MAIN ENTRY POINT FOR PROGRAM, returns the crypt as a string | return cipherstr , degree as str
 	 */
 	
 	public static String[] encrypt_bins(String[] bins, int blocksize, float TRI_RATIO) { //TODO FIXUP CLEANUP
 		
 		boolean verified = false;
 		String bigcrypt = "";
+	
 		int stepct = 0;
 		float startangle = (float) 0.0;
 		LinkedList vals = null;
@@ -910,29 +916,41 @@ public class SPAN {
 				if (stepct == 0) {
 					 vals = encrypt(token, blocksize, TRI_RATIO, 0, stepct++);
 					bigcrypt += (String) vals.get(0);
+					//bigcryptasarray[stepct] = (String) vals.get(0);
 					startangle = (float) vals.get(1);
 				} else {
 					 vals = encrypt(token, blocksize, TRI_RATIO, startangle, stepct++);
 					bigcrypt += (String) vals.get(0);
+					//bigcryptasarray[stepct] = (String) vals.get(0);
 				}
 				
 				
 			}
 			
 			String[] dec = decrypt_string((String) vals.get(0), blocksize, TRI_RATIO, startangle);
-			verified = true;
 			
-			for (int i = 0; i < dec.length; i++) {
-				if (binary_to_char(sum_to_binary(Integer.parseInt(dec[i]))) != binary_to_char(bins[i])) {
-					System.out.println("DECRYPT MISMATCH (" + sum_to_binary(Integer.parseInt(dec[i])) + " <> " + binary_to_char(bins[i]) + ")");
-					verified = false;
-				}
-			}
+			//verified = true;
+			
+			//for (int i = 0; i < dec.length; i++) {
+				
+				//System.out.println("BINARYCHAR>" + binary_to_char(sum_to_binary(Integer.parseInt(dec[i]))));
+				
+				//System.out.println("BINCHAR> " + binary_to_char(sum_to_binary(Integer.parseInt(dec[i]))));
+				//System.out.println(dec[i]);
+		//	}
+			
+			
+			
+			verified = true; //TODO EXTERNALIZE
 			//VERIFY
 		}
 		
 		return new String[] {bigcrypt, String.valueOf(startangle)};
 	}
+	
+	/*
+	 * main entry point for decrypting something encrypted in SPAN
+	 */
 	
 	public static String[] decrypt_string(String crypt, int blocksize, float TRI_RATIO, float start) {
 		String ret = "";
@@ -1047,57 +1065,370 @@ public class SPAN {
 				//pretend_adversary();
 	}
 	
+	/*
+	 * get next biggest size with respect to the tokencount passed from sender
+	 */
+	public static int getPreambleSizeFor(int tokenct) { //TODO Implementation decision, stay 256 or do dynamic? Static should be better..
+		return 256;
+	}
+	
+	private static final int preambleAlphabetOffset = 26;
+	private static final char preambleAlphabetOffsetChar = 'a';
+	
+	public static char generateRandomChar() { 
+		return (char)((new Random()).nextInt(preambleAlphabetOffset) + preambleAlphabetOffsetChar);
+	}
+	
+	/*
+	 * generate random data that we will encrypt and pass back to sender
+	 */
+	
+	public static String[] generatePreambleFor(int size) {
+		String preambleDataPre = "";
+		char c;
+		for (int i = 0; i < size; i++) {
+			 c = generateRandomChar();
+			preambleDataPre += c;
+			
+			System.out.println("CHOOSE > " + c);
+		}
+		return cryptstring_to_array(encrypt_bins(to_padded_list(to_binary_list(preambleDataPre)), 8, (float) 0.3)[0]);
+	}
+	
+	/*
+	 * Takes the crypt tokens and the preamble tokens and carves out a space for it to sit, returns the indices where the actual data sits in the cipher block
+	 returns:
+	 0 - the preamble, data, postamble as str[]
+	 1 - the start int as string
+	 2 - the end int as string
+	 */
+	
+	public static String[][] fitToPreamble(String cryptString, String[] preambleBinaryTokens) {
+		
+		//String[] encryptedPreamble = encrypt_bins(preambleBinaryTokens, 8, (float) 0.3); //TODO FIXUP
+		
+		//preambleBinaryTokens = cryptstring_to_array(encryptedPreamble[0]);
+		
+		String[] cryptTokens;
+		
+		
+		int blockpadct = 0;
+		char blockdenoter = 'A'; //Base
+		
+		for (int i = 0; i < cryptString.length(); i++) {
+			if (Character.isLetter(cryptString.charAt(i))) {
+				blockpadct++;
+				
+				blockdenoter = cryptString.charAt(i);
+			}
+		}
+		
+		
+		for (int i = 0; i < preambleBinaryTokens.length; i++) {
+			
+			if (!((preambleBinaryTokens[i].charAt( preambleBinaryTokens[i].length()-1) == blockdenoter))) {
+				preambleBinaryTokens[i] = preambleBinaryTokens[i] + blockdenoter;
+			}
+		}
+		
+		cryptTokens = new String[blockpadct];
+		int last = 0;
+		int repopct = 0;
+		
+		for (int i = 0; i < cryptString.length(); i++) {
+			if (Character.isLetter(cryptString.charAt(i))) {
+				cryptTokens[repopct++] = cryptString.substring(last, i + 1);
+				last = i + 1;
+			}
+		}
+		/*
+		for (String s : cryptTokens) {
+			System.out.println("REPOP > " + s);
+		}
+		*/
+		/*
+		for (String s : cryptTokens) {
+			System.out.println("RECOVEREDCRYPTTOKEN > " + s);
+		}
+		*/
+		int diff = preambleBinaryTokens.length - cryptTokens.length;
+		
+		if (diff < 0) {
+			System.out.println("FATAL, SIZE MISMATCH FOR PREAMBLE FIT!");
+			System.out.println("PREAMBLE TOKENS LENGTH = " + preambleBinaryTokens.length);
+			System.out.println("CRYPT TOKENS LENGTH = " + cryptTokens.length);
+			System.exit(-1);
+			return null;
+		}
+		/*
+		for (String s : preambleBinaryTokens) {
+			System.out.println("PRE > " + s);
+		}
+		*/
+		//int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);
+		
+		//int randomNum = ThreadLocalRandom.current().nextInt(cryptTokens.length, preambleTokens.length);
+		
+		boolean goodPair = false;
+		
+		int start = 0, end = 0;
+		
+		while (!goodPair) { //find good place to put it
+			 start = ThreadLocalRandom.current().nextInt(cryptTokens.length, preambleBinaryTokens.length);
+			 end =   start + cryptTokens.length; //TODO + 1?
+			 
+			 if (!(end > preambleBinaryTokens.length)) goodPair = true; 
+		}
+		
+		//System.out.println("PROPER START > " + start);
+		//System.out.println("PROPER END > " + end);
+		
+		while (end < start) end++;
+		
+		while ( (end-start) < (cryptTokens.length)) end++;
+		
+		String new_combined[] = new String[preambleBinaryTokens.length];
+		
+		int crypt_step = 0;
+		
+		
+		
+		for (int i = 0; i < new_combined.length; i++) {
+			
+			if (i < start) {
+				new_combined[i] = preambleBinaryTokens[i]; //fill big array with random data, preamble
+			} else if (i >= start && i < end) {
+				//System.out.println(end - start);
+				new_combined[i] = cryptTokens[crypt_step++]; //insert the crypt
+			} else if (i >= end) {
+				new_combined[i] = preambleBinaryTokens[i]; //postamble
+			}
+		}
+		
+		/*
+		 * JUST TOKENS NO SHUFFLE
+		 */
+		
+		return new String[][] {new_combined, new String[] {String.valueOf(start)}, new String[] {String.valueOf(end)}}; //~pay the cost to be the boss~ - James Brown
+	}
+	
+	public static String[] getcryptfromblock(String[] cipherblock, int start, int end) { //TODO FINISH
+		//System.out.println("CRYPTRECOVER START > " + start);
+		//System.out.println("CRYPTRECOVER END > " + end);
+		String[] ret = new String[end-start];
+		int retct = 0;
+		
+		for (int i = start; i < end; i++) { //check off by one
+			ret[retct++] = cipherblock[i];
+		}
+		
+		if (!(ret.length == (end-start))) {
+			System.out.println("OFFBYONE for getting crypt from block..");
+			System.exit(-100);
+		}
+		
+		for (String s : ret) {
+			//System.out.println("RECOVERED " + s);
+		}
+		
+		char blockdenoter = 'A'; //TODO FIXUP - CHANGE FOR MORE BLOCKS
+		
+		for (int i = 0; i < ret.length; i++) {
+			
+			if (!((ret[i].charAt( ret[i].length()-1) == blockdenoter))) {
+				ret[i] = ret[i] + blockdenoter;
+			}
+		}
+		
+		return ret;
+	}
+	
+	public static String[] unshufflecipherblock(String cipherblock, float ratio, int start, int end, int blocklength) {
+		/*
+		int[] replaces = generate_replacement_indices_for(ratio, start, end, blocklength); //TODO FIXUP
+		
+		String[] unshuffled = new String[replaces.length]; 
+		
+		//[0] = 75 so do backwards, e.g.
+		
+		HashMap<Integer, String> placement = new HashMap <Integer, String>();
+		
+		String[] cipherblockstringasarray = cryptstring_to_array(cipherblock);
+		
+		for (int i = 0; i < replaces.length; i++) {
+			placement.put(replaces[i], cipherblockstringasarray[replaces[i]]);
+		}
+		
+		for (int i = 0; i < blocklength; i++) {
+			if (placement.get(i) != null) unshuffled[i] = placement.get(i);
+		}
+		
+		for (int i : replaces) System.out.println("REPLACE > " + i);
+		*/
+		return cryptstring_to_array(cipherblock); //TODO FIX CIPHER SHUFFLE
+	}
+	
+	public static String[] cryptstring_to_array(String crypt) {
+		String[] bigcrypt;
+		int ct = 0, last = 0;
+		for (int i = 0; i < crypt.length(); i++) if (Character.isLetter(crypt.charAt(i))) ct++;
+		
+		bigcrypt = new String[ct];
+		
+		ct = 0;
+		
+		for (int i = 0; i < crypt.length(); i++) { //2nd pass format and transfer
+			if (Character.isLetter(crypt.charAt(i))) {
+				bigcrypt[ct++] = crypt.substring(last, i);
+				last = i+1;
+			}
+		}
+		
+		return bigcrypt;
+		
+	}
+	
+	public static int[] generate_replacement_indices_for(float ratio, int start, int end, int cipherblocklength) {
+		int[] finalindices = new int[cipherblocklength];
+		int[] toswap = new int[cipherblocklength];
+		int[] freenums = new int[cipherblocklength];
+		float[] progressiveDegrees = new float[cipherblocklength];
+		
+		for (int i = 0; i < cipherblocklength; i++) {
+			freenums[i] = i;
+			toswap[i] = -1;
+		}
+		
+		float newdegree = ((float) (start + end)) / ratio;
+		//make new start degree independent of other degree based on the ratio and start/end
+		
+		HashMap<Integer, Boolean> placements = new HashMap<Integer, Boolean>();
+		
+		for (int i = 0; i < cipherblocklength; i++) {
+			progressiveDegrees[i] = next_degree(ratio, newdegree, i);
+			toswap[i] = (int) Math.round(next_degree(ratio, newdegree, i));
+			placements.put(toswap[i], true);
+		}
+		
+
+		boolean ok = true;
+		
+		while (!ok) {
+			for (int i = 0; i < toswap.length; i++) {
+				if (toswap[i] == -1) { //if we need placement
+					for (int p = 0; p < toswap.length; p++) { //get a num that we havent placed for placement
+						if (placements.get(p) == null) { //arrived at a number we haven't placed yet so put it in this spot
+							toswap[i] = p;
+							placements.put(p, true);
+						}
+					}
+				}
+			}
+		
+			//check again
+			
+			for (int i = 0; i < toswap.length; i++) {
+				if (placements.get(i) == null) {
+					System.out.println("FATAL! MISSING NO. '" + i + "'");
+					ok = false;
+				}
+			}
+		}
+		
+		if (!ok) System.exit(-1);
+		
+		
+		String checkstrtemp = "";
+		
+		for (int i : toswap) {
+			//System.out.println(i);
+			checkstrtemp += i;
+		}
+		
+		System.out.println("CHECKSTR FOR replace >> " + checkstrtemp);
+		
+		
+		
+		return toswap;
+	}
+	
 	
 	public static void repl() {
 		boolean run = true;
 		
-		String[] menu = new String[] {"Encrypt","Decrypt","Evaluate"};
+		String[] menu = new String[] {"Encryptv1","Decrypt","Evaluate", "Encryptv2", "Decryptv2"};
 		Scanner input = new Scanner(System.in);
 		while (run) {
 			
 			
 			System.out.println("Welcome to SPAN (Toy Cipher, Alpha) - Joshua Loysch");
 			System.out.println("Please choose a menu option: ");
-			System.out.print("\n[0] " + menu[0] + "\n[1] " + menu[1] + "\n[2] " + menu[2] + "\n\n>> ");
+			System.out.print("\n[0] " + menu[0] + "\n[1] " + menu[1] + "\n[2] " + menu[2] + "\n[3] " + menu[3] + "\n[4] " + menu[4] + "\n\n>> ");
 			
 			
 			
 			String choice = input.next();
-			
+			float ratio = (float) 0.0;
+			int blocksize;
+			String phrase;
+
 			switch (choice) {
 				case "0":
 					
-					input.nextLine(); //Consume newline character 
+					boolean verified = false;				
 					
-					System.out.println("Enter a phrase to encrypt:");
+					while (!verified) {
+						input.nextLine(); //Consume newline character 
+						
+						System.out.println("Enter a phrase to encrypt:");
+						
+						phrase = input.nextLine();
+						
+						System.out.println("Enter your skew ratio:\n>> ");
+						
+						ratio = input.nextFloat();
+						
+						input.nextLine();
+						
+						System.out.print("Finally, enter the desired block size:\n>> ");
+						blocksize = input.nextInt();
+						System.out.println("Encrypting '" + phrase + "'...");
+						
+						input.nextLine();
+						
+						
+						String[] bins = to_padded_list(to_binary_list(phrase));
+						
+						//System.out.println(encrypt_bins(bins, blocksize, (float) ratio));
+						
+						String[] encrypted = encrypt_bins(bins, blocksize, (float) ratio);
+						
+						System.out.print("\n\n\n");
+						
+						String[] verify = decrypt_string(encrypted[0], blocksize, ratio, Float.parseFloat(encrypted[1]));
+						
+						verified = true;
+						String verif_str = "";
+						for (String s : verify) {
+							System.out.println("\t" + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+							verif_str+=binary_to_char(sum_to_binary(Integer.parseInt(s)));
+						}
+						
+						if (verif_str.equals(phrase)) {
+							//System.out.println("\n\nOK!");
+							
+							System.out.println("\nENCRYPTION COMPLETED AND REVERSIBILITY VERIFIED! DETAILS BELOW:\n\n>--- BEGIN ---<");
+							System.out.println(encrypted[0]);
+							System.out.println(encrypted[1]+"degsR\\\\"+ratio+"\\\\"+8);
+							System.out.println(">--- END, PLEASE KEEP FOR YOUR RECORDS ---<\n\n");
+						} else {
+							verified = false;
+						}
+					}
 					
-					String phrase = input.nextLine();
-					
-					System.out.println("Enter your skew ratio:\n>> ");
-					//String wtf = input.next();
-					float ratio = input.nextFloat();
-					
-					input.nextLine();
-					
-					System.out.print("Finally, enter the desired block size:\n>> ");
-					int blocksize = input.nextInt();
-					System.out.println("Encrypting '" + phrase + "'...");
-					
-					input.nextLine();
 					
 					
-					String[] bins = to_padded_list(to_binary_list(phrase));
-					
-					//System.out.println(encrypt_bins(bins, blocksize, (float) ratio));
-					
-					String[] encrypted = encrypt_bins(bins, blocksize, (float) ratio);
-					
-					System.out.println("\nENCRYPTION COMPLETED AND REVERSIBILITY VERIFIED! DETAILS BELOW:\n\n>--- BEGIN ---<");
-					System.out.println(encrypted[0]);
-					System.out.println(encrypted[1]+"degsR\\\\"+ratio+"\\\\"+8);
-					System.out.println(">--- END, PLEASE KEEP FOR YOUR RECORDS ---<");
-					
-					System.out.print("\n\n\n");
+//TODO HERE
 					break;
 				case "1":
 					
@@ -1141,8 +1472,286 @@ public class SPAN {
 					}
 					System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
 					
+					//System.out.println("SIZE DECRYPTED " + decrypted.length);
 					break;
 				case "2":
+					break;
+				case "3":
+					verified = false;				
+					
+					while (!verified) {
+						input.nextLine(); //Consume newline character 
+						
+						System.out.println("Enter a phrase to encrypt:");
+						
+						phrase = input.nextLine();
+						
+						System.out.println("Enter your skew ratio:\n>> ");
+						
+						ratio = input.nextFloat();
+						
+						input.nextLine();
+						
+						System.out.print("Finally, enter the desired block size:\n>> ");
+						blocksize = input.nextInt();
+						System.out.println("Encrypting '" + phrase + "'...");
+						
+						input.nextLine();
+						
+						
+						String[] bins = to_padded_list(to_binary_list(phrase));
+						
+						//System.out.println(encrypt_bins(bins, blocksize, (float) ratio));
+						
+						String[] encrypted = encrypt_bins(bins, blocksize, (float) ratio);
+						
+						//int preambleSize = getPreambleSizeFor(100);
+						//String preamble = generatePreambleFor(preambleSize);
+						
+						System.out.print("\n\n\n");
+						
+						String[] verify = decrypt_string(encrypted[0], blocksize, ratio, Float.parseFloat(encrypted[1]));
+						
+						verified = true;
+						String verif_str = "";
+						for (String s : verify) {
+							System.out.println("\t" + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+							verif_str+=binary_to_char(sum_to_binary(Integer.parseInt(s)));
+						}
+						
+						if (verif_str.equals(phrase)) {
+							//System.out.println("\n\nOK!");
+							
+							System.out.println("\nENCRYPTION COMPLETED AND REVERSIBILITY VERIFIED! DETAILS BELOW:\n\n>--- BEGIN ---<");
+							System.out.println(encrypted[0]);
+							System.out.println(encrypted[1]+"degsR\\\\"+ratio+"\\\\"+8);
+							System.out.println(">--- END, PLEASE KEEP FOR YOUR RECORDS ---<\n\n");
+						} else {
+							verified = false;
+						}
+						
+						
+						/*
+						 * NOW HERE IS WHERE WE MAKE IT INTERESTING WITH PHASE 1 ADDITION, THE BLOCK!
+						 */
+						
+						//TODO Convert to method
+						
+						String[][] cm = fitToPreamble(encrypted[0], generatePreambleFor(256));
+						
+						String[] bigBlock = cm[0];
+						
+						String rawfitencryptnoshufflecu = "";
+						for (String s : bigBlock) {
+							//System.out.println("BLOCK > " + s);
+							rawfitencryptnoshufflecu+=s;
+						}
+						
+						System.out.println("CRYPT_BASE_PHRASE_PRE_FIT_AND_SHUFFLE > " + encrypted[0]);
+						
+						System.out.println("NOSHUFFLE Cu > " + rawfitencryptnoshufflecu);
+						
+						/*
+						int[] replaces = generate_replacement_indices_for((float) 0.8, Integer.valueOf(cm[1][0]), Integer.valueOf(cm[2][0]), 256);
+						
+						String[] shuffled_cipher = new String[replaces.length]; 
+						
+						
+						for (int i = 0; i < shuffled_cipher.length; i++) {
+							shuffled_cipher[i] = cm[0][replaces[i]];
+						}
+						
+						String cryptstrforshuffle = "";
+						
+						for (String s : shuffled_cipher) {
+							//System.out.println("AFTERBLOCK > " + s);
+							cryptstrforshuffle +=s;
+						}
+						
+						System.out.println("SHUFFLE > " + cryptstrforshuffle);
+						*/
+						
+						
+						/* UNSHUFFLE STEP *?
+						 */
+						
+						//TODO FIX SHUFFLING IN BLOCKS
+						
+						//String[] unshuffledcipher = unshufflecipherblock(cryptstrforshuffle, (float) ratio, Integer.parseInt(cm[1][0]), Integer.parseInt(cm[2][0]), 256 );
+						
+						
+						String[] getCryptFromBlock = getcryptfromblock(cm[0], Integer.parseInt(cm[1][0]), Integer.parseInt(cm[2][0]));
+						
+						System.out.println("CRYPTFROMBLOCK > " + getCryptFromBlock[0]);
+						
+						String testreshufflestr = "";
+						
+						for (String s : getCryptFromBlock) {
+							testreshufflestr += s;
+						}
+						
+						System.out.println("CRYPT_BASE_PHRASE_FROM_GET > " + testreshufflestr);
+						
+						decrypted = decrypt_string(testreshufflestr, blocksize, ratio, Float.parseFloat(encrypted[1]));
+						
+						System.out.println("\nDECRYPTION OUTPUT >\n");
+						for (String s : decrypted) {
+							System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+						}
+						System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
+						
+								
+						System.out.println("START > " + cm[1][0]);
+						
+						System.out.println("END > " + cm[2][0]);
+						System.out.println("CIPHER >>\n\n");
+						System.out.println("---BEGIN:");
+						System.out.println(rawfitencryptnoshufflecu);
+						System.out.println("--END CIPHER--");
+						System.out.println("\nYour Token > //" + encrypted[1] + "D" + ratio + "R" + cm[1][0] + "S" + cm[2][0] + "F\\\\\n\n");
+						
+						System.out.println("Save ? [y/n]");
+						
+						choice = input.next(); 
+						
+						if (choice.equalsIgnoreCase("y")) {
+						 try {
+						      FileWriter myWriter = new FileWriter("crypt.txt");
+						      myWriter.write(rawfitencryptnoshufflecu.toCharArray());
+						      myWriter.close();
+						      myWriter = new FileWriter("key.txt");
+						      myWriter.write("//" + encrypted[1] + "D" + ratio + "R" + cm[1][0] + "S" + cm[2][0] + "F\\\\");
+						      myWriter.close();
+						      System.out.println("Successfully wrote to the files.\n\n");
+						    } catch (IOException e) {
+						      System.out.println("An error occurred.\n\n");
+						      e.printStackTrace();
+						    }
+						}
+					}
+					
+					break;
+				case "4":
+					
+					System.out.println("Please enter the cipher >>");
+					String cipher = input.next();
+					System.out.println("Please enter your decrypt key in the format '//...\\\\");
+					choice = input.next();
+					
+					String reformatted = choice.substring(2, choice.length()-2); //Chop off
+					
+					System.out.println("CHOP > " + reformatted);
+					
+					//String crypt, int blocksize, float TRI_RATIO, float start
+					
+					//String[] res = decrypt_string (reformatted, r deg start)
+					
+					//   //38.184643D0.888R153S159F\\ - suggested format, also implies it's shrinking something in so it's a SPAN key!
+					
+					int blck_ct = 0;
+					String[] tokens = new String[4];
+					int lastindex = 0;
+					
+					for (int i = 0; i < reformatted.length(); i++) { //2nd pass format and transfer
+						if (Character.isLetter(reformatted.charAt(i))) {
+
+							tokens[blck_ct++] = reformatted.substring(lastindex, i);
+							lastindex = i+1;
+						}
+					}
+					
+					/*
+					 * tokens:
+					 * 	0 - degree
+					 * 	1 - ratio
+					 * 	2 - start
+					 * 	3 - end
+					 */
+					
+					for (String s : tokens) {
+						System.out.println("KEYTOK > " + s);
+					}
+					
+					/*
+					//String[] ciphertokens = cryptstring_to_array(cipher);
+					//String[] mintokens = new String[Integer.parseInt(tokens[3])-Integer.parseInt(tokens[2])];
+					//int mintokstep = 0;
+					
+					//for (int i = Integer.parseInt(tokens[2]); i < Integer.parseInt(tokens[3]); i++) { //copy over minimum
+					//	mintokens[mintokstep++] = ciphertokens[i];
+					}
+					
+					String recollectedmintok = "";
+					
+					for (String s : mintokens) recollectedmintok += s + "A"; //TODO Check if missing block labels again for whatever reason
+					
+					//TODO AGAIN, FIX BLOCK LABELS?! Depending on how I implement how I want it to go next I jut may not..
+					*/
+					
+					/*
+					 * decrypt_string(String crypt, int blocksize, float TRI_RATIO, float start)
+					 */
+					
+					//TODO BIG TODO JUST MAKE THE BLOCKSIZE 8 ?!
+					
+					//System.out.println("MIN > " + recollectedmintok);
+					
+					//String[] res = decrypt_string (recollectedmintok, 8, Float.parseFloat(tokens[1]), Float.parseFloat(tokens[0]));
+				
+					System.out.println("Cryptfromblockstart = " + tokens[2]);
+					System.out.println("Cryptfromblockend = " + tokens[1]);
+					String[] cipherasarray = cryptstring_to_array(cipher);
+					
+					
+					
+					char blockdenoter = 'A'; //TODO BLOCKPADFIXUP
+					
+					for (int i = 0; i < cipherasarray.length; i++) {
+						
+						if (!((cipherasarray[i].charAt( cipherasarray[i].length()-1) == blockdenoter))) {
+							cipherasarray[i] = cipherasarray[i] + blockdenoter;
+						}
+					}
+					
+					for (String s : cipherasarray) {
+						System.out.println("CIPHERTOKENTOARRAY> " + s);
+					}
+					
+					String[] getCryptFromBlock = getcryptfromblock(cipherasarray, Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
+					
+					System.out.println("CRYPTFROMBLOCK > " + getCryptFromBlock[0]);
+					
+					String getcrypt = "";
+					
+					for (String s : getCryptFromBlock) {
+						getcrypt += s;
+					
+					}
+					
+					System.out.println("CRYPT_BASE_PHRASE_FROM_GET > " + getcrypt);
+					
+					System.out.println("USE RATIO " + Float.parseFloat(tokens[1]));
+					System.out.println("USE BLOCK " + 8);
+					System.out.println("USE DEGREE " + Float.parseFloat(tokens[0]));
+					
+					
+					
+					decrypted = decrypt_string(getcrypt, 8, Float.parseFloat(tokens[1]), Float.parseFloat(tokens[0])); //TODO STATIC BLOCKSIZE????!! 8?!
+					
+					System.out.println("\nDECRYPTION OUTPUT >\n");
+					for (String s : decrypted) {
+						System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+					}
+					System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
+					
+					/*
+					System.out.println("\nDECRYPTION OUTPUT >\n");
+					
+					for (String s : res) { 
+						System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+					}
+					System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
+					*/
 					break;
 				default:
 					break;
@@ -1156,6 +1765,9 @@ public class SPAN {
 	
 	public static void main(String args[]) {
 		repl();
+		//generate_replacement_indices_for((float) 0.8, 28, 56, 256);
+		
+		//generatePreambleFor(256);
 	}
 
 }
