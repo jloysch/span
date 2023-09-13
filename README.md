@@ -1,3 +1,8 @@
+> V2! - NOW HIDING PHRASES INSIDE OF A BLOCK OF 256!
+>
+> LATER - Planning to Daisy-Chain/Cascade multiple SPANS for each character of a phrase to add further complexity and safety. e.g. HELLLO BECOMES 23.2308Asdf...99.9843B.. and so on, each previous block having a key for the next block and the resulting blocks having start/end and ratios as functions of
+> each previous block. Planning to implement this exciting idea later.
+
 Introducing SPAN: My First Encryption Algorithm - Joshua Loysch
 
 SPAN is a cool little encryption algorithm that takes a bit of a different approach to encrypting data. 
