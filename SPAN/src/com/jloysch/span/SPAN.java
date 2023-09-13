@@ -56,6 +56,21 @@ public class SPAN {
 		
 		return sum;
 		*/
+		/*
+		if (binary_representation.equals("000000000000")) return 0;
+		if (binary_representation.equals("100000000000")) return 1;
+		if (binary_representation.equals("010000000000")) return 2;
+		if (binary_representation.equals("110000000000")) return 3;
+		if (binary_representation.equals("001000000000")) return 4;
+		if (binary_representation.equals("101000000000")) return 5;
+		if (binary_representation.equals("011000000000")) return 6;
+		if (binary_representation.equals("111000000000")) return 7;
+		if (binary_representation.equals("000100000000")) return 8;
+		if (binary_representation.equals("100100000000")) return 9;
+		
+		*/
+		//System.out.println(binary_representation + " >>> " + binary_representation);
+		
 		return Integer.parseInt(binary_representation,2);
 	}
 	
@@ -213,7 +228,7 @@ public class SPAN {
 			System.out.println("Sum[" + i + "] = " + sums[i]);
 		}
 		
-		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		
 		
 		if (degree == 0) {
@@ -322,7 +337,7 @@ public class SPAN {
 					System.out.println("Sum[" + i + "] = " + sums[i]);
 				}
 				
-				final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+				final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 				float degree = generate_some_degree();
 				
 				String crypt = "";
@@ -801,9 +816,56 @@ public class SPAN {
 	}
 	
 	public static String[] to_binary_list(String phrase) {
+		String numbers = "0123456789";
 		String[] ret = new String[phrase.length()];
+		boolean wasnumber = false;
 		for (int i = 0; i < ret.length; i++) {
-			ret[i] = Integer.toBinaryString(phrase.charAt(i));
+			switch (phrase.charAt(i)) {
+				case '0':
+					ret[i] = "00000000";
+					wasnumber = true;
+					break;
+				case '1':
+					ret[i] = "10000000";
+					wasnumber = true;
+					break;
+				case '2':
+					ret[i] = "01000000";
+					wasnumber = true;
+					break;
+				case '3':
+					ret[i] = "11000000";
+					wasnumber = true;
+					break;
+				case '4':
+					ret[i] = "00100000";
+					wasnumber = true;
+					break;
+				case '5':
+					ret[i] = "10100000";
+					wasnumber = true;
+					break;
+				case '6':
+					ret[i] = "01100000";
+					wasnumber = true;
+					break;
+				case '7':
+					ret[i] = "11100000";
+					wasnumber = true;
+					break;
+				case '8':
+					ret[i] = "00010000";
+					wasnumber = true;
+					break;
+				case '9':
+					ret[i] = "10010000";
+					wasnumber = true;
+					break;
+				default:
+					break;
+			}
+			
+			if (!wasnumber) ret[i] = Integer.toBinaryString(phrase.charAt(i));
 		}
 		
 		return ret;
@@ -997,13 +1059,29 @@ public class SPAN {
 	
 	public static char binary_to_char(String bin) {
 	
-		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,';] [\\/!@#$%^&*()-+=1234567890~`";
+		final String alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,';] [\\/!@#$%^&*()-+=1234567890~`";
 		
 		String[][] bin_array = new String[alphabet.length()][];
 		
 		for (int i = 0; i < alphabet.length(); i++) { //make array of every one :]
 			bin_array[i] = to_padded_list(to_binary_list(String.valueOf(alphabet.charAt(i))));
 		}
+		
+		if (binary_to_sum(bin) == 128) return '1';
+		else if (binary_to_sum(bin) == 64) return '2';
+		else if (bin == ("1000000")) return '2';
+		else if (binary_to_sum(bin) == 192) return '3';
+		else if (binary_to_sum(bin) == 32) return '4';
+		else if (bin.equals("100000")) return '4';
+		else if (binary_to_sum(bin) == 160) return '5';
+		else if (binary_to_sum(bin) == 96) return '6';
+		else if (bin.equals("1100000")) return '6';
+		else if (binary_to_sum(bin) == 224) return '7';
+		else if (binary_to_sum(bin) == 16) return '8';
+		else if (bin.equals("10000")) return '8';
+		else if (binary_to_sum(bin) == 144) return '9';
+		else
+			System.out.println("BINSUM > NaN '" + bin + "'");
 		
 		int step = 0;
 		for (String[] s2 : bin_array) {
@@ -1015,12 +1093,36 @@ public class SPAN {
 				
 				//System.out.println("COMPARE <" + s + " <> " + bin + ">");
 				if (binary_to_sum(s) == binary_to_sum(bin)) {
+					
+					//special case check for numbers
+					
+					System.out.println("BINCHAR > " + bin);
+					
+					
+					System.out.println("BINNUM > " + (Integer.parseInt(bin, 2)));
+						
+					//binnum 128 = 1
+					//binnum 64 = 2
+					//binnum 192 = 3
+					//binnum 32 = 4
+					//binnum 160 = 5
+					//binnum 96 = 6
+					//binnum 224 = 7
+					//binnum 16 = 8
+					//binnum 144 = 9
+					
+					
+					
 					System.out.println("MATCH!");
 					return alphabet.charAt(step);
 				}
 				step++;
 			}
 		}
+		
+		
+		System.out.println("BINNUM > RETURNING NULL FOR '" + bin + "'");
+		
 		return '\0'; //next-best next to null
 		
 	}
@@ -1501,6 +1603,9 @@ public class SPAN {
 						
 						String[] bins = to_padded_list(to_binary_list(phrase));
 						
+						for (String b : bins) {
+							System.out.println("BINS > " + b);
+						}
 						//System.out.println(encrypt_bins(bins, blocksize, (float) ratio));
 						
 						String[] encrypted = encrypt_bins(bins, blocksize, (float) ratio);
