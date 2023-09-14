@@ -1223,6 +1223,32 @@ return array of sums
 		if (bin.equals("11010001")) return '=';
 		if (bin.equals("11110111")) return '`';
 		
+		if (bin.equals("10110111")) return '{';
+		if (bin.equals("10101011")) return '}';
+		if (bin.equals("101111000")) return '|';
+		if (bin.equals("101111010")) return '\\';
+		
+		//if (bin.equals("11010110")) return ':';
+		if (bin.equals("11011011")) return ';';
+		if (bin.equals("11100101")) return '"';
+		if (bin.equals("11101011")) return '\'';
+		/*
+		if (bin.equals("10110101")) return '<';
+		if (bin.equals("10100101")) return ',';
+		if (bin.equals("10101111")) return '>';
+		if (bin.equals("11011101")) return '.';
+		if (bin.equals("11110011")) return '?';
+		if (bin.equals("11101111")) return '/';
+		*/
+		
+		
+		
+		
+		
+		
+		
+		//final full specials
+		
 		
 		
 		
@@ -1667,7 +1693,37 @@ return array of sums
 				altphrase[i] = 'Ñ';
 			} else if (phrase.charAt(i) == '`') {
 				altphrase[i] = '÷';
+			} else if (phrase.charAt(i) == '{') {//final full specials
+				altphrase[i] = '˜'; //not ~
+			} else if (phrase.charAt(i) == '}') {
+				altphrase[i] = '«';
+			} else if (phrase.charAt(i) == '|') {
+				altphrase[i] = '¼';
+			} else if (phrase.charAt(i) == '\\') {
+				altphrase[i] = '½';
+			} else if (phrase.charAt(i) == ':') {
+				altphrase[i] = 'Ö';
+			} else if (phrase.charAt(i) == ';') {
+				altphrase[i] = 'Û';
+			} else if (phrase.charAt(i) == '"') {
+				altphrase[i] = 'å';
+			} else if (phrase.charAt(i) == '\'') {
+				altphrase[i] = 'ë';
+			} else if (phrase.charAt(i) == '<') {
+				altphrase[i] = 'µ';
+			} else if (phrase.charAt(i) == ',') {
+				altphrase[i] = '¥';
+			} else if (phrase.charAt(i) == '>') {
+				altphrase[i] = '¯';
+			} else if (phrase.charAt(i) == '.') {
+				altphrase[i] = 'Ý';
+			} else if (phrase.charAt(i) == '?') {
+				altphrase[i] = 'ó';
+			} else if (phrase.charAt(i) == '/') {
+				altphrase[i] = 'ï';
 			}
+					
+					
 		}
 
 		//String phraseogswapback = phrase;
