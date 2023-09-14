@@ -1,3 +1,4 @@
+
 > V2! - NOW HIDING PHRASES INSIDE OF A BLOCK OF 256!
 >
 > LATER - Planning to Daisy-Chain/Cascade multiple SPANS for each character of a phrase to add further complexity and safety. e.g. HELLLO BECOMES 23.2308Asdf...99.9843B.. and so on, each previous block having a key for the next block and the resulting blocks having start/end and ratios as functions of
@@ -8,6 +9,12 @@
 If we take this up a notch and
 > chain SPANs then we can add extreme complexity from a simple password encrypted in this medium- there will be a sea of data to look at and it's all plaintext. I would love to add hotwords in the pre/postamble (see website for terminology) to dupe would-be attackers to believing they've decrypted the blocks
 > when in fact they haven't.
+
+
+RECOGNIZED CHARACTERS
+> abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~`!@#$%^&*()_-+=
+
+
 
 Introducing SPAN: My First Encryption Algorithm - Joshua Loysch
 
