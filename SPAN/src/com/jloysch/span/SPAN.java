@@ -1195,6 +1195,22 @@ return array of sums
 		*/
 		//HashMap <String, Boolean> check = new HashMap <Integer, Boolean>();
 		
+		if (bin.equals("11010111")) return '0';
+		if (bin.equals("10101001")) return '1';
+		if (bin.equals("10110001")) return '2';
+		if (bin.equals("10111110")) return '3';
+		if (bin.equals("10100001")) return '4';
+		if (bin.equals("10100111")) return '5';
+		if (bin.equals("10111111")) return '6';
+		if (bin.equals("10110011")) return '7';
+		if (bin.equals("10111001")) return '8';
+		if (bin.equals("11001011")) return '9';
+		if (bin.equals("11001001")) return 'g';
+		
+		
+		
+		
+		
 		int step = 0;
 		for (String[] s2 : bin_array) {
 			for (String s : s2) {
@@ -1567,6 +1583,49 @@ return array of sums
 		return toswap;
 	}
 	
+	public static String char_arr_to_str(char[] chars) {
+		String ret = "";
+		
+		for (char c : chars) ret+= c;
+		
+		return ret;
+	}
+	
+	public static String inputfixup(String phrase) {
+		
+		char[] altphrase = phrase.toCharArray();
+		for (int i = 0; i < phrase.length(); i++) {
+
+			if (phrase.charAt(i) == ('0')) { //use extended ASCII, possible security flaw unless we include more extended ascii in block TODO CHECK
+				altphrase[i] = '×';
+			} else if (phrase.charAt(i) == ('1')) {
+				altphrase[i] = 'œ';
+			} else if (phrase.charAt(i) == ('2')) {
+				altphrase[i] = '±';
+			} else if (phrase.charAt(i) == ('3')) {
+				altphrase[i] = 'Ž';
+			} else if (phrase.charAt(i) == ('4')) {
+				altphrase[i] = '¡';
+			} else if (phrase.charAt(i) == ('5')) {
+				altphrase[i] = '§';
+			} else if (phrase.charAt(i) == ('6')) {
+				altphrase[i] = '¿';
+			} else if (phrase.charAt(i) == ('7')) {
+				altphrase[i] = '³';
+			} else if (phrase.charAt(i) == ('8')) {
+				altphrase[i] = '¹';
+			} else if (phrase.charAt(i) == ('9')) {
+				altphrase[i] = 'Ë';
+			} else if (phrase.charAt(i) == ('g')) {
+				altphrase[i] = 'ƒ';
+			}
+		}
+
+		//String phraseogswapback = phrase;
+		phrase = char_arr_to_str(altphrase);
+		
+		return phrase;
+	}
 	
 	public static void repl() {
 		boolean run = true;
@@ -1611,10 +1670,42 @@ return array of sums
 						System.out.println("Encrypting '" + phrase + "'...");
 						
 						input.nextLine();
+						/*
+						char[] altphrase = phrase.toCharArray();
+						for (int i = 0; i < phrase.length(); i++) {
+			
+							if (phrase.charAt(i) == ('0')) { //use extended ASCII, possible security flaw unless we include more extended ascii in block TODO CHECK
+								altphrase[i] = '×';
+							} else if (phrase.charAt(i) == ('1')) {
+								altphrase[i] = 'œ';
+							} else if (phrase.charAt(i) == ('2')) {
+								altphrase[i] = '±';
+							} else if (phrase.charAt(i) == ('3')) {
+								altphrase[i] = 'Ž';
+							} else if (phrase.charAt(i) == ('4')) {
+								altphrase[i] = '¡';
+							} else if (phrase.charAt(i) == ('5')) {
+								altphrase[i] = '§';
+							} else if (phrase.charAt(i) == ('6')) {
+								altphrase[i] = '¿';
+							} else if (phrase.charAt(i) == ('7')) {
+								altphrase[i] = '³';
+							} else if (phrase.charAt(i) == ('8')) {
+								altphrase[i] = '¹';
+							} else if (phrase.charAt(i) == ('9')) {
+								altphrase[i] = 'Ë';
+							}
+						}
+						*/
+						String phraseogswapback = phrase;
+						phrase = inputfixup(phrase); //do number replacements
 						
+						
+						System.out.println("New Phrase > " + phrase);
 						
 						String[] bins = to_padded_list(to_binary_list(phrase));
 						
+						phrase = phraseogswapback; //necessary for the verification check!
 						
 						for (String b : bins) {
 							System.out.println("BINS > " + b);
@@ -1733,7 +1824,28 @@ return array of sums
 						input.nextLine();
 						
 						
+						String phraseogswapback = phrase;
+						phrase = inputfixup(phrase); //do number replacements
+						
+						
+						System.out.println("New Phrase > " + phrase);
+						
+						//String[] bins = to_padded_list(to_binary_list(phrase));
+						
+						
+						
+						
+						System.out.println("NEWPHRASE > " + phrase);
+						
 						String[] bins = to_padded_list(to_binary_list(phrase));
+						
+						phrase = phraseogswapback; //necessary for the verification check!
+						
+						/*
+						 * MODIFY PHRASE TO REPLACE 1 WITH 'ONE'
+						 */
+						
+						
 						
 						for (String b : bins) {
 							System.out.println("BINS > " + b);
