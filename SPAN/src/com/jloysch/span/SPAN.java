@@ -71,6 +71,11 @@ public class SPAN {
 		*/
 		//System.out.println(binary_representation + " >>> " + binary_representation);
 		
+		//if (binary_representation.equals("10100000")) return 385; //P
+		///if (binary_representation.equals("11100000")) return 386; //p
+		
+		
+		
 		return Integer.parseInt(binary_representation,2);
 	}
 	
@@ -213,6 +218,7 @@ public class SPAN {
 	public static LinkedList encrypt(String rawbinary, int blocksize, float ratio, float degree, int blocknumber){ 
 		String data = rawbinary;
 		
+		//System.out.println("LINKEDLISTENCRYPT");
 		int blocks = rawbinary.length()/blocksize;
 		
 		//int sum_of_data_at_chunk = binary_to_sum(data);
@@ -220,11 +226,12 @@ public class SPAN {
 		int[] sums = new int[data.length()/blocksize];
 		
 		System.out.println(data);
+		String subblock = "";
 		for (int i = 0; i < sums.length; i++) {
 			//System.out.println(i);
-			
+			subblock = data.substring(0 + blocksize*i, blocksize + blocksize*i);
 			sums[i] = binary_to_sum(data.substring(0 + blocksize*i, blocksize + blocksize*i));
-			
+			System.out.println("SUBBLOCK > '" + subblock + "'");
 			System.out.println("Sum[" + i + "] = " + sums[i]);
 		}
 		
@@ -540,6 +547,8 @@ public class SPAN {
 		return Integer.toBinaryString(sum);
 	}
 	
+	//returns sum of the tokens it got back
+	
 	public static int[] decrypt_manual(String crypt, float R, double start) {
 		String[] crypt_tokens = new String[1]; //TODO PLEASE CHANGE THIS IS JUST BCS IM ANNOYED, NEEDS TO BE EXACT LENGTH
 		crypt_tokens[0] = crypt;
@@ -553,6 +562,7 @@ public class SPAN {
 		
 		String[] resequenced_safe = new String[blocks];
 		
+		
 		int blck_ct = 0, lastindex = 0;
 		
 		for (int i = 0; i < crypt.length(); i++) { //2nd pass format and transfer
@@ -563,7 +573,16 @@ public class SPAN {
 			}
 		}
 		
+		for (String s : resequenced_safe) {
+			System.out.println("RESEQUENCESAFE > " + s);
+		}
+		
 		int[] dec_tokens = decrypt(resequenced_safe, R, (float) start);
+		
+		for (int i : dec_tokens) {
+			System.out.println("DECTOKEN > " + i);
+		}
+		
 		return dec_tokens;
 	}
 	
@@ -803,6 +822,12 @@ public class SPAN {
 	
 	public static String to_binary_string(String phrase) {
 		String ret = "";
+		/*
+		if (phrase.equals("p")) return "11100001"; 
+		if (phrase.equals("P")) return "11100011";
+		if (phrase.equals("H")) return "11100111";
+		*/
+		System.out.println("PHRASE '" + phrase + "' NOT SPECIAL CASE");
 		
 		for (int i = 0; i < phrase.length(); i++) {
 			if (i == phrase.length() - 1) {
@@ -815,11 +840,24 @@ public class SPAN {
 		return ret;
 	}
 	
-	public static String[] to_binary_list(String phrase) {
-		String numbers = "0123456789";
+	public static String[] to_binary_list(String phrase) { //TODO LOOK
+		//String numbers = "0123456789";
 		String[] ret = new String[phrase.length()];
 		boolean wasnumber = false;
-		for (int i = 0; i < ret.length; i++) {
+		
+		//System.out.println("PHRASE > " + phrase);
+		//System.out.println("Phrase length is " + phrase.length());
+		/*
+		if (binary_list[i].equals("10100000")) binary_list[i] = "11100011"; //p -- manually correct missing alphabet
+		if (binary_list[i].equals("11100111")) binary_list[i] = "11100111"; //P
+		if (binary_list[i].equals("11100111")) binary_list[i] = "11100111"; //H
+		*/
+		
+		//System.out.println("PHRASE = '" + phrase + "'");
+		
+		for (int i = 0; i < phrase.length(); i++) {
+			
+			/*
 			switch (phrase.charAt(i)) {
 				case '0':
 					ret[i] = "00000000";
@@ -863,11 +901,24 @@ public class SPAN {
 					break;
 				default:
 					break;
+					
 			}
 			
-			if (!wasnumber) ret[i] = Integer.toBinaryString(phrase.charAt(i));
+			if (!wasnumber) {
+				ret[i] = Integer.toBinaryString(phrase.charAt(i));
+				
+				//System.out.println("NO NUMBER > '" + phrase + "'");
+			}
+			*/
+			
+			
+			ret[i] = Integer.toBinaryString(phrase.charAt(i));
+			//System.out.println("CONVERT > " + ret[i]);
+			
 		}
-		
+		for (String s : ret) {
+			//System.out.println("CONVERET > " + s);
+		}
 		return ret;
 	}
 	
@@ -900,6 +951,19 @@ public class SPAN {
 			for (int j = binary_list[i].length(); j < longest; j++) {
 				binary_list[i] += "0"; //Pad 0 to rightmost, align all bits
 			}
+			
+			/*
+			 * FIX PAD ERRORS FOR ALPHABET!!!!!!!!!! TODO BIG ADDRESS
+			 */
+			
+			/*
+			 * 		else if (bin.equals("11011000")) return 'l';
+				else if (bin.equals("11100010")) return 'q';
+				else if (bin.equals("11100001")) return 'p';
+				else if (bin.equals("11100011")) return 'P';
+				else if (bin.equals("11100111")) return 'H';
+			 */
+			
 			//System.out.println("BIN[" + i + "]=" + binary_list[i]);
 		}
 		
@@ -973,10 +1037,14 @@ public class SPAN {
 			values.add(ratio);
 			*/
 
+				/*
+				 * FIX SUM COLLISIONS BEFORE ENCRYPT AND ENCRYPT_BINS!!!!!!!!
+				 */
 			
 			for (String token : bins) {
+				//System.out.println("PREENCRYPTTOKEN> '" + token + "'");
 				if (stepct == 0) {
-					 vals = encrypt(token, blocksize, TRI_RATIO, 0, stepct++);
+					vals = encrypt(token, blocksize, TRI_RATIO, 0, stepct++);
 					bigcrypt += (String) vals.get(0);
 					//bigcryptasarray[stepct] = (String) vals.get(0);
 					startangle = (float) vals.get(1);
@@ -1011,7 +1079,8 @@ public class SPAN {
 	}
 	
 	/*
-	 * main entry point for decrypting something encrypted in SPAN
+	 * main entry point for decrypting something encrypted in SPAN, 
+return array of sums
 	 */
 	
 	public static String[] decrypt_string(String crypt, int blocksize, float TRI_RATIO, float start) {
@@ -1054,12 +1123,39 @@ public class SPAN {
 			rettok[rettokct++] = String.valueOf(dcm[0]);//TODO FIX
 		}
 		
+		/*
+		for (String s : rettok) {
+			System.out.println("RETTOK > " + s);
+		}
+		*/
+		
 		return rettok;
 	}
 	
-	public static char binary_to_char(String bin) {
+	public static void donothinglol() {}
 	
-		final String alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,';] [\\/!@#$%^&*()-+=1234567890~`";
+	public static boolean forcharequals(String s1, String s2) {
+		int len = 0;
+		
+		if (s1.length() != s2.length()) {
+			//return false;
+			
+			len = (s1.length() < s2.length() ? s1.length() : s2.length());
+		} else {
+			len = s1.length();
+		}
+		
+		boolean ok = true;
+		for (int i = 0; i < len; i++) {
+			if (s1.charAt(i) != s2.charAt(i)) ok = false;
+		}
+		
+		return ok;
+	}
+	
+	public static char binary_to_char(String bin) { //THE DIRTY DEUCE! MEAT AND POTATOES!
+	
+		final String alphabet = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,';] [\\/!@#$%^&*()-+=~`";
 		
 		String[][] bin_array = new String[alphabet.length()][];
 		
@@ -1067,21 +1163,36 @@ public class SPAN {
 			bin_array[i] = to_padded_list(to_binary_list(String.valueOf(alphabet.charAt(i))));
 		}
 		
-		if (binary_to_sum(bin) == 128) return '1';
-		else if (binary_to_sum(bin) == 64) return '2';
-		else if (bin == ("1000000")) return '2';
-		else if (binary_to_sum(bin) == 192) return '3';
-		else if (binary_to_sum(bin) == 32) return '4';
+		System.out.println("BINARY IN > " + bin);
+		/*
+		if (bin.equals("10000000")) return '1';
+		
+		else if (bin.equals("11011000")) return 'l';
+		else if (bin.equals("11100010")) return 'q';
+		else if (bin.equals("11100001")) return 'p';
+		else if (bin.equals("11100011")) return 'P';
+		else if (bin.equals("11100111")) return 'H';
+		
+		else if (bin.equals("1000000")) return '2';
+		else if (bin.equals("11000000")) return '3';
 		else if (bin.equals("100000")) return '4';
-		else if (binary_to_sum(bin) == 160) return '5';
-		else if (binary_to_sum(bin) == 96) return '6';
+		else if (bin.equals("10100000")) return '5';
 		else if (bin.equals("1100000")) return '6';
-		else if (binary_to_sum(bin) == 224) return '7';
-		else if (binary_to_sum(bin) == 16) return '8';
+		else if (bin.equals("11100000")) return '7';
 		else if (bin.equals("10000")) return '8';
-		else if (binary_to_sum(bin) == 144) return '9';
+		else if (bin.equals("10010000")) return '9';
+		
+		else if (forcharequals(bin,"100100000000")) return '9'; //TODO edgecase check 100100000000
+		
+		else if (forcharequals(bin, "10010000")) return 'H'; //10010000
+		
+		
+		
+	
 		else
-			System.out.println("BINSUM > NaN '" + bin + "'");
+			//System.out.println("BINSUM > NaN '" + bin + "'");
+			donothinglol(); //lol
+		*/
 		
 		int step = 0;
 		for (String[] s2 : bin_array) {
@@ -1096,7 +1207,7 @@ public class SPAN {
 					
 					//special case check for numbers
 					
-					System.out.println("BINCHAR > " + bin);
+					//System.out.println("BINCHAR > " + bin);
 					
 					
 					System.out.println("BINNUM > " + (Integer.parseInt(bin, 2)));
@@ -1113,7 +1224,7 @@ public class SPAN {
 					
 					
 					
-					System.out.println("MATCH!");
+					System.out.println("MATCH!\n\n");
 					return alphabet.charAt(step);
 				}
 				step++;
@@ -1463,6 +1574,7 @@ public class SPAN {
 		while (run) {
 			
 			
+			
 			System.out.println("Welcome to SPAN (Toy Cipher, Alpha) - Joshua Loysch");
 			System.out.println("Please choose a menu option: ");
 			System.out.print("\n[0] " + menu[0] + "\n[1] " + menu[1] + "\n[2] " + menu[2] + "\n[3] " + menu[3] + "\n[4] " + menu[4] + "\n\n>> ");
@@ -1501,6 +1613,11 @@ public class SPAN {
 						
 						String[] bins = to_padded_list(to_binary_list(phrase));
 						
+						
+						for (String b : bins) {
+							System.out.println("BINS > " + b);
+						}
+						
 						//System.out.println(encrypt_bins(bins, blocksize, (float) ratio));
 						
 						String[] encrypted = encrypt_bins(bins, blocksize, (float) ratio);
@@ -1511,10 +1628,15 @@ public class SPAN {
 						
 						verified = true;
 						String verif_str = "";
+						
 						for (String s : verify) {
+							System.out.println("Verifying..");
 							System.out.println("\t" + binary_to_char(sum_to_binary(Integer.parseInt(s))));
 							verif_str+=binary_to_char(sum_to_binary(Integer.parseInt(s)));
 						}
+						System.out.println("Verified.");
+						
+						
 						
 						if (verif_str.equals(phrase)) {
 							//System.out.println("\n\nOK!");
@@ -1525,6 +1647,10 @@ public class SPAN {
 							System.out.println(">--- END, PLEASE KEEP FOR YOUR RECORDS ---<\n\n");
 						} else {
 							verified = false;
+							System.out.println("VERIFICATIONMISMATCH!");
+							System.out.println("GOT >\n" + verif_str);
+							System.out.println("EXPECTED >\n" + phrase);
+							System.exit(-1);
 						}
 					}
 					
@@ -1568,10 +1694,14 @@ public class SPAN {
 					
 					String[] decrypted = decrypt_string(phrase, blocksize, ratio, degree);
 					
+					String dcstr = "";
 					System.out.println("\nDECRYPTION OUTPUT >\n");
 					for (String s : decrypted) {
 						System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+						dcstr+= binary_to_char(sum_to_binary(Integer.parseInt(s)));
 					}
+					System.out.println("ASSTR >\n" + dcstr);
+					
 					System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
 					
 					//System.out.println("SIZE DECRYPTED " + decrypted.length);
@@ -1620,6 +1750,7 @@ public class SPAN {
 						verified = true;
 						String verif_str = "";
 						for (String s : verify) {
+							System.out.println("VERIFYING STRING '" + s + "'");
 							System.out.println("\t" + binary_to_char(sum_to_binary(Integer.parseInt(s))));
 							verif_str+=binary_to_char(sum_to_binary(Integer.parseInt(s)));
 						}
@@ -1698,11 +1829,14 @@ public class SPAN {
 						System.out.println("CRYPT_BASE_PHRASE_FROM_GET > " + testreshufflestr);
 						
 						decrypted = decrypt_string(testreshufflestr, blocksize, ratio, Float.parseFloat(encrypted[1]));
-						
+						String dcassstr = "";
 						System.out.println("\nDECRYPTION OUTPUT >\n");
 						for (String s : decrypted) {
 							System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+							dcassstr += binary_to_char(sum_to_binary(Integer.parseInt(s)));
 						}
+						System.out.println("\nASSTR > " + dcassstr);
+						
 						System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
 						
 								
@@ -1844,9 +1978,13 @@ public class SPAN {
 					decrypted = decrypt_string(getcrypt, 8, Float.parseFloat(tokens[1]), Float.parseFloat(tokens[0])); //TODO STATIC BLOCKSIZE????!! 8?!
 					
 					System.out.println("\nDECRYPTION OUTPUT >\n");
+					dcstr = "";
 					for (String s : decrypted) {
 						System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+						dcstr += binary_to_char(sum_to_binary(Integer.parseInt(s)));
 					}
+					System.out.println("\nASSTR >\n" + dcstr);
+					
 					System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
 					
 					/*
@@ -1861,6 +1999,7 @@ public class SPAN {
 				default:
 					break;
 			}
+			
 			
 			
 		}
