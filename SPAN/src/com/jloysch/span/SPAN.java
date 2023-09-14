@@ -1207,6 +1207,25 @@ return array of sums
 		if (bin.equals("11001011")) return '9';
 		if (bin.equals("11001001")) return 'g';
 		
+		if (bin.equals("11111110")) return '!'; //extend specials
+		if (bin.equals("11111111")) return '@';
+		if (bin.equals("11111010")) return '#';
+		if (bin.equals("11111001")) return '$';
+		if (bin.equals("11110110")) return '%';
+		if (bin.equals("11111000")) return '^';
+		if (bin.equals("11100111")) return '&';
+		if (bin.equals("11000001")) return '*';
+		if (bin.equals("11000011")) return '(';
+		if (bin.equals("11000101")) return ')';
+		if (bin.equals("11010101")) return '-';
+		if (bin.equals("11011001")) return '_';
+		if (bin.equals("11010011")) return '+';
+		if (bin.equals("11010001")) return '=';
+		if (bin.equals("11110111")) return '`';
+		
+		
+		
+		
 		
 		
 		
@@ -1618,6 +1637,36 @@ return array of sums
 				altphrase[i] = 'Ë';
 			} else if (phrase.charAt(i) == ('g')) {
 				altphrase[i] = 'ƒ';
+			} else if (phrase.charAt(i) == ('!')) { //extend special chars
+				altphrase[i] = 'þ';
+			} else if (phrase.charAt(i) == ('@')) {
+				altphrase[i] = 'ÿ';
+			} else if (phrase.charAt(i) == ('#')) {
+				altphrase[i] = 'ú';
+			} else if (phrase.charAt(i) == '$') {
+				altphrase[i] = 'ù';
+			} else if (phrase.charAt(i) == '%') {
+				altphrase[i] = 'ö';
+			} else if (phrase.charAt(i) == '^') { //collision with x
+				altphrase[i] = 'ø';
+			} else if (phrase.charAt(i) == '&') {
+				altphrase[i] = 'ç';
+			} else if (phrase.charAt(i) == '*') {
+				altphrase[i] = 'Á';
+			} else if (phrase.charAt(i) == '(') {
+				altphrase[i] = 'Ã';
+			} else if (phrase.charAt(i) == ')') {
+				altphrase[i] = 'Å';
+			} else if (phrase.charAt(i) == '-') {
+				altphrase[i] = 'Õ';
+			} else if (phrase.charAt(i) == '_') {
+				altphrase[i] = 'Ù';
+			} else if (phrase.charAt(i) == '+') {
+				altphrase[i] = 'Ó';
+			} else if (phrase.charAt(i) == '=') {
+				altphrase[i] = 'Ñ';
+			} else if (phrase.charAt(i) == '`') {
+				altphrase[i] = '÷';
 			}
 		}
 
@@ -1630,7 +1679,7 @@ return array of sums
 	public static void repl() {
 		boolean run = true;
 		
-		String[] menu = new String[] {"Encryptv1","Decrypt","Evaluate", "Encryptv2", "Decryptv2"};
+		String[] menu = new String[] {"Encryptv1(DEPRECATED)","Decrypt(DEPRECATED)","Evaluate", "Encryptv2", "Decryptv2"};
 		Scanner input = new Scanner(System.in);
 		while (run) {
 			
@@ -1649,6 +1698,9 @@ return array of sums
 
 			switch (choice) {
 				case "0":
+					
+					if (true) break;
+					
 					
 					boolean verified = false;				
 					
@@ -1752,6 +1804,8 @@ return array of sums
 //TODO HERE
 					break;
 				case "1":
+					
+					if (true) break;
 					
 					input.nextLine(); //Consume newline character 
 					
