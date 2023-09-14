@@ -1155,7 +1155,7 @@ return array of sums
 	
 	public static char binary_to_char(String bin) { //THE DIRTY DEUCE! MEAT AND POTATOES!
 	
-		final String alphabet = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,';] [\\/!@#$%^&*()-+=~`";
+		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,';] [\\1234567890/!@#$%^&*()-+=~`";
 		
 		String[][] bin_array = new String[alphabet.length()][];
 		
@@ -1193,6 +1193,7 @@ return array of sums
 			//System.out.println("BINSUM > NaN '" + bin + "'");
 			donothinglol(); //lol
 		*/
+		//HashMap <String, Boolean> check = new HashMap <Integer, Boolean>();
 		
 		int step = 0;
 		for (String[] s2 : bin_array) {
@@ -1227,6 +1228,7 @@ return array of sums
 					System.out.println("MATCH!\n\n");
 					return alphabet.charAt(step);
 				}
+				
 				step++;
 			}
 		}
