@@ -32,4 +32,4 @@ THERE ARE *BOTH* Reversible and Irreversible ciphers this algorithm can generate
 
 This is the first working version, a little idea I have had for a while that I wanted to get coded up. I am excited to see how this goes :)
 
-Theoretically this could have a complexity of 2^129 + 3.194e38 so it's surprisingly secure for such a simple approach. 
+> This algorithm should have a calculated complexity of (2^140 + (1.3^46)) (Without Daisy-Chaining (to be added)) and (2^158 + 1.3^46) with the Daisy-Chaining (to be added later)
