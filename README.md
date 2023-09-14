@@ -13,6 +13,9 @@ If we take this up a notch and
 
 RECOGNIZED CHARACTERS
 > abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~`!@#$%^&*()_-+=
+
+
+
 Introducing SPAN: My First Encryption Algorithm - Joshua Loysch
 
 SPAN is a cool little encryption algorithm that takes a bit of a different approach to encrypting data. 
