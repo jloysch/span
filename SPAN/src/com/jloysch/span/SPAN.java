@@ -215,8 +215,199 @@ public class SPAN {
 		return gen;
 	}
 	
-	public static LinkedList encrypt(String rawbinary, int blocksize, float ratio, float degree, int blocknumber){ 
+	//PUBLIC ACCESSIBLE METHOD
+	
+	/**
+	 * encrypt()
+	 * 
+	 * Take the phrase, ratio, and blocksize and return a String[]
+	 * 
+	 * String[0] = Crypt
+	 * String[1] = Key
+	 * 
+	 */
+	
+	
+	public static String[] encrypt(String phrase, float ratio, int blocksize, boolean writetofile) {
+		String[] pair = new String[2];
+		
+		boolean verified = false;				
+		
+		while (!verified) {
+			
+			String phraseogswapback = phrase;
+			phrase = inputfixup(phrase); //do number replacements
+			
+			
+			//System.out.println("New Phrase > " + phrase);
+			
+			//String[] bins = to_padded_list(to_binary_list(phrase));
+			
+			
+			
+			
+			//System.out.println("NEWPHRASE > " + phrase);
+			
+			String[] bins = to_padded_list(to_binary_list(phrase));
+			
+			phrase = phraseogswapback; //necessary for the verification check!
+			
+			/*
+			 * MODIFY PHRASE TO REPLACE 1 WITH 'ONE'
+			 */
+			
+			
+			//System.out.println(encrypt_bins(bins, blocksize, (float) ratio));
+			
+			String[] encrypted = encrypt_bins(bins, blocksize, (float) ratio);
+			
+			//int preambleSize = getPreambleSizeFor(100);
+			//String preamble = generatePreambleFor(preambleSize);
+			
+			//System.out.print("\n\n\n");
+			
+			String[] verify = decrypt_string(encrypted[0], blocksize, ratio, Float.parseFloat(encrypted[1]));
+			
+			verified = true;
+			String verif_str = "";
+			for (String s : verify) {
+				//System.out.println("VERIFYING STRING '" + s + "'");
+				//System.out.println("\t" + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+				verif_str+=binary_to_char(sum_to_binary(Integer.parseInt(s)));
+			}
+			
+			if (verif_str.equals(phrase)) {
+				//System.out.println("\n\nOK!");
+				/*
+				System.out.println("\nENCRYPTION COMPLETED AND REVERSIBILITY VERIFIED! DETAILS BELOW:\n\n>--- BEGIN ---<");
+				System.out.println(encrypted[0]);
+				System.out.println(encrypted[1]+"degsR\\\\"+ratio+"\\\\"+8);
+				System.out.println(">--- END, PLEASE KEEP FOR YOUR RECORDS ---<\n\n");
+				*/
+				verified = true;
+			} else {
+				verified = false;
+			}
+			
+			
+			/*
+			 * NOW HERE IS WHERE WE MAKE IT INTERESTING WITH PHASE 1 ADDITION, THE BLOCK!
+			 */
+			
+			//TODO Convert to method
+			
+			String[][] cm = fitToPreamble(encrypted[0], generatePreambleFor(256));
+			
+			String[] bigBlock = cm[0];
+			
+			String rawfitencryptnoshufflecu = "";
+			for (String s : bigBlock) {
+				//System.out.println("BLOCK > " + s);
+				rawfitencryptnoshufflecu+=s;
+			}
+			
+			//System.out.println("CRYPT_BASE_PHRASE_PRE_FIT_AND_SHUFFLE > " + encrypted[0]);
+			
+			//System.out.println("NOSHUFFLE Cu > " + rawfitencryptnoshufflecu);
+			
+			/*
+			int[] replaces = generate_replacement_indices_for((float) 0.8, Integer.valueOf(cm[1][0]), Integer.valueOf(cm[2][0]), 256);
+			
+			String[] shuffled_cipher = new String[replaces.length]; 
+			
+			
+			for (int i = 0; i < shuffled_cipher.length; i++) {
+				shuffled_cipher[i] = cm[0][replaces[i]];
+			}
+			
+			String cryptstrforshuffle = "";
+			
+			for (String s : shuffled_cipher) {
+				//System.out.println("AFTERBLOCK > " + s);
+				cryptstrforshuffle +=s;
+			}
+			
+			System.out.println("SHUFFLE > " + cryptstrforshuffle);
+			*/
+			
+			
+			/* UNSHUFFLE STEP *?
+			 */
+			
+			//TODO FIX SHUFFLING IN BLOCKS
+			
+			//String[] unshuffledcipher = unshufflecipherblock(cryptstrforshuffle, (float) ratio, Integer.parseInt(cm[1][0]), Integer.parseInt(cm[2][0]), 256 );
+			
+			
+			String[] getCryptFromBlock = getcryptfromblock(cm[0], Integer.parseInt(cm[1][0]), Integer.parseInt(cm[2][0]));
+			
+			//System.out.println("CRYPTFROMBLOCK > " + getCryptFromBlock[0]);
+			
+			String testreshufflestr = "";
+			
+			for (String s : getCryptFromBlock) {
+				testreshufflestr += s;
+			}
+			
+			//System.out.println("CRYPT_BASE_PHRASE_FROM_GET > " + testreshufflestr);
+			
+			String[] decrypted = decrypted = decrypt_string(testreshufflestr, blocksize, ratio, Float.parseFloat(encrypted[1]));
+			String dcassstr = "";
+			//System.out.println("\nDECRYPTION OUTPUT >\n");
+			
+			for (String s : decrypted) {
+				//System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+				dcassstr += binary_to_char(sum_to_binary(Integer.parseInt(s)));
+			}
+			
+			/*
+			System.out.println("\nASSTR > " + dcassstr);
+			
+			System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
+			
+					
+			System.out.println("START > " + cm[1][0]);
+			
+			System.out.println("END > " + cm[2][0]);
+			System.out.println("CIPHER >>\n\n");
+			System.out.println("---BEGIN:");
+			System.out.println(rawfitencryptnoshufflecu);
+			System.out.println("--END CIPHER--");
+			System.out.println("\nYour Token > //" + encrypted[1] + "D" + ratio + "R" + cm[1][0] + "S" + cm[2][0] + "F\\\\\n\n");
+			
+			System.out.println("Save ? [y/n]");
+			*/
+			
+			//choice = input.next(); 
+			
+			if (writetofile) {
+			 try {
+			      FileWriter myWriter = new FileWriter("crypt.txt");
+			      myWriter.write(rawfitencryptnoshufflecu.toCharArray());
+			      myWriter.close();
+			      myWriter = new FileWriter("key.txt");
+			      myWriter.write("//" + encrypted[1] + "D" + ratio + "R" + cm[1][0] + "S" + cm[2][0] + "F\\\\");
+			      myWriter.close();
+			      System.out.println("Successfully wrote to the files.\n\n");
+			    } catch (IOException e) {
+			      System.out.println("An error occurred.\n\n");
+			      e.printStackTrace();
+			    }
+			}
+			
+			pair[0] = rawfitencryptnoshufflecu;
+			pair[1] = ("//" + encrypted[1] + "D" + ratio + "R" + cm[1][0] + "S" + cm[2][0] + "F\\\\");
+		}
+	
+		
+		return pair;
+	}
+	
+	//INTERNAL METHOD 
+	private static LinkedList encrypt(String rawbinary, int blocksize, float ratio, float degree, int blocknumber){ 
 		String data = rawbinary;
+		
+		//boolean verbose = false;
 		
 		//System.out.println("LINKEDLISTENCRYPT");
 		int blocks = rawbinary.length()/blocksize;
@@ -225,14 +416,14 @@ public class SPAN {
 		
 		int[] sums = new int[data.length()/blocksize];
 		
-		System.out.println(data);
+		//System.out.println(data);
 		String subblock = "";
 		for (int i = 0; i < sums.length; i++) {
 			//System.out.println(i);
 			subblock = data.substring(0 + blocksize*i, blocksize + blocksize*i);
 			sums[i] = binary_to_sum(data.substring(0 + blocksize*i, blocksize + blocksize*i));
-			System.out.println("SUBBLOCK > '" + subblock + "'");
-			System.out.println("Sum[" + i + "] = " + sums[i]);
+			//System.out.println("SUBBLOCK > '" + subblock + "'");
+			//System.out.println("Sum[" + i + "] = " + sums[i]);
 		}
 		
 		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -266,26 +457,36 @@ public class SPAN {
 			crypt+= (i > alphabet.length() ? alphabet.charAt(alphabet.length()-i) : alphabet.charAt(i));
 			crypts[i] = crypt;
 			crypt = "";
-			System.out.println("SUMGENERATED > " + crypt);
+			//System.out.println("SUMGENERATED > " + crypt);
 		}
 		
-		System.out.println("DEGREES");
+		//System.out.println("DEGREES");
 		
+		//DEGREES GENERATED
+		/*
 		for (float f : degrees) {
 			System.out.println(f);
 		}
+		*/
 		
+		/*
 		System.out.println("R = " + ratio);
 		System.out.println("\n\n");
+		*/
 		
 		//System.out.println("CRYPT > " + crypt);
 		
+		/*
 		System.out.println("CRYPT > ") ;
 		System.out.print("\n--BEGIN--\n\t[");
+		*/
+		
+		/*
 		for (String s : crypts) {
 			System.out.print(s);
 		}
 		System.out.println("]" + "//" + degree + "degsR" +"\n--END--");
+		*/
 		
 		LinkedList values = new LinkedList();
 		
@@ -302,7 +503,7 @@ public class SPAN {
 		return values;	
 	}
 	
-	public static void test_a() {
+	private static void test_a() {
 		//System.out.println(sum_of_data_at_chunk);
 		
 				//float degree_of_obsfucation = generate_some_degree();
@@ -389,7 +590,7 @@ public class SPAN {
 				decrypt(crypts, ratio, degree);
 	}
 	
-	public static boolean verify(int times) {
+	private static boolean verify(int times) {
 		Boolean logs[] = new Boolean[times];
 		
 		for (int a = 0; a < times; a++) {
@@ -492,7 +693,7 @@ public class SPAN {
 		return ok;
 	}
 	
-	public static void loop_test() {
+	private static void loop_test() {
 		int step = 0;
 		while (verify(1)) {
 			System.out.println(">>>>>>>>>>>>>>>>TRY " + step++ + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -573,20 +774,21 @@ public class SPAN {
 			}
 		}
 		
+		/*
 		for (String s : resequenced_safe) {
 			System.out.println("RESEQUENCESAFE > " + s);
 		}
-		
+		*/
 		int[] dec_tokens = decrypt(resequenced_safe, R, (float) start);
-		
+		/*
 		for (int i : dec_tokens) {
 			System.out.println("DECTOKEN > " + i);
 		}
-		
+		*/
 		return dec_tokens;
 	}
 	
-	public static void test_single() {
+	private static void test_single() {
 		//test_a();	
 		
 				//PASS DATA INTO THIS BLOCK BY BLOCK
@@ -626,14 +828,14 @@ public class SPAN {
 				
 	}
 	
-	public static void main_test() {
+	private static void main_test() {
 		encrypt("101110111011", 12, TRI_RATIO_FINAL, 0, 0);
 		TRI_RATIO_FINAL = (float) 0.5;
 		
 		decrypt_manual("782.1675A", TRI_RATIO_FINAL, (double) 14.965881);
 	}
 	
-	public static boolean test_manual(String bits, int blocksize, float triratio) {
+	private static boolean test_manual(String bits, int blocksize, float triratio) {
 		LinkedList vals = encrypt(bits, blocksize, triratio, 0, 0);
 		//decrypt_manual((String) vals.get(0), triratio, 3.0);
 		int dec_tok[] = decrypt_manual((String) vals.get(0), triratio, (float) vals.get(1));
@@ -686,7 +888,8 @@ public class SPAN {
 		return all_blocks_ok;
 		
 	}
-	public static void loop_until_some_failure_test() {
+	
+	private static void loop_until_some_failure_test() {
 		boolean error = false; //This one makes me laugh every time I write it
 		int cnt = 0;
 		while (!error) {
@@ -712,7 +915,7 @@ public class SPAN {
 		}
 	}
 	
-	public static void loop_until_some_failure_12bitalign() { //Can proces a chunk of up to 12 bits
+	private static void loop_until_some_failure_12bitalign() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
 		
@@ -729,7 +932,7 @@ public class SPAN {
 		
 	}
 	
-	public static void loop_until_some_failure_4bitalign() { //Can proces a chunk of up to 12 bits
+	private static void loop_until_some_failure_4bitalign() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
 		
@@ -746,7 +949,7 @@ public class SPAN {
 		
 	}
 	
-	public static void loop_until_some_failure_4bitalignalt() { //Can proces a chunk of up to 12 bits
+	private static void loop_until_some_failure_4bitalignalt() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
 		
@@ -763,7 +966,7 @@ public class SPAN {
 		
 	}
 	
-	public static void loop_until_some_failure_6bitalign() { //Can proces a chunk of up to 12 bits
+	private static void loop_until_some_failure_6bitalign() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
 		
@@ -780,7 +983,7 @@ public class SPAN {
 		
 	}
 	
-	public static void loop_until_some_failure_3bitalign() { //RAISES ERRORS on 3 BIT DO NOT USE
+	private static void loop_until_some_failure_3bitalign() { //RAISES ERRORS on 3 BIT DO NOT USE
 		boolean error = false;
 		int CNT = 0;
 		
@@ -797,7 +1000,7 @@ public class SPAN {
 		
 	}
 	
-	public static void loop_until_some_failure_8bitalign() { //RAISES ERRORS on 3 BIT DO NOT USE
+	private static void loop_until_some_failure_8bitalign() { //RAISES ERRORS on 3 BIT DO NOT USE
 		boolean error = false;
 		int CNT = 0;
 		
@@ -814,7 +1017,7 @@ public class SPAN {
 		
 	}
 	
-	public static void hello() {
+	private static void hello() {
 		//01001000 01000101 01001100 01001100 01001111
 		
 		
@@ -974,7 +1177,11 @@ public class SPAN {
 		return binary_list;
 	}
 	
-	public static void pretend_adversary() {
+	/*
+	 * TODO Moving to Adversary.java
+	 */
+	
+	private static void pretend_adversary() {
 		String tolist = "MY@NAME@IS@JOSH"; //TODO FIX @ for space
 		char aslist[] = new char[tolist.length()];
 		
@@ -1132,9 +1339,10 @@ return array of sums
 		return rettok;
 	}
 	
-	public static void donothinglol() {}
+	private static void donothinglol() {} /* filler for an if clause */
 	
-	public static boolean forcharequals(String s1, String s2) {
+	private static boolean forcharequals(String s1, String s2) {
+		
 		int len = 0;
 		
 		if (s1.length() != s2.length()) {
@@ -1163,7 +1371,7 @@ return array of sums
 			bin_array[i] = to_padded_list(to_binary_list(String.valueOf(alphabet.charAt(i))));
 		}
 		
-		System.out.println("BINARY IN > " + bin);
+		//System.out.println("BINARY IN > " + bin);
 		/*
 		if (bin.equals("10000000")) return '1';
 		
@@ -1272,7 +1480,7 @@ return array of sums
 					//System.out.println("BINCHAR > " + bin);
 					
 					
-					System.out.println("BINNUM > " + (Integer.parseInt(bin, 2)));
+					//System.out.println("BINNUM > " + (Integer.parseInt(bin, 2)));
 						
 					//binnum 128 = 1
 					//binnum 64 = 2
@@ -1286,7 +1494,7 @@ return array of sums
 					
 					
 					
-					System.out.println("MATCH!\n\n");
+					//System.out.println("MATCH!\n\n");
 					return alphabet.charAt(step);
 				}
 				
@@ -1295,13 +1503,13 @@ return array of sums
 		}
 		
 		
-		System.out.println("BINNUM > RETURNING NULL FOR '" + bin + "'");
+		System.out.println("FATAL! UNPARSEABLE BIN '" + bin+"' BINNUM > RETURNING NULL FOR '" + bin + "'");
 		
 		return '\0'; //next-best next to null
 		
 	}
 	
-	public static void justsomedebugstuff() {
+	private static void justsomedebugstuff() {
 		//loop_until_some_failure_test();
 				//loop_until_some_failure_12bitalign();
 				//loop_until_some_failure_6bitalign();
@@ -1344,7 +1552,8 @@ return array of sums
 	/*
 	 * get next biggest size with respect to the tokencount passed from sender
 	 */
-	public static int getPreambleSizeFor(int tokenct) { //TODO Implementation decision, stay 256 or do dynamic? Static should be better..
+	
+	private static int getPreambleSizeFor(int tokenct) { //TODO Implementation decision, stay 256 or do dynamic? Static should be better..
 		return 256;
 	}
 	
@@ -1359,14 +1568,14 @@ return array of sums
 	 * generate random data that we will encrypt and pass back to sender
 	 */
 	
-	public static String[] generatePreambleFor(int size) {
+	private static String[] generatePreambleFor(int size) {
 		String preambleDataPre = "";
 		char c;
 		for (int i = 0; i < size; i++) {
 			 c = generateRandomChar();
 			preambleDataPre += c;
 			
-			System.out.println("CHOOSE > " + c);
+			//System.out.println("CHOOSE > " + c);
 		}
 		return cryptstring_to_array(encrypt_bins(to_padded_list(to_binary_list(preambleDataPre)), 8, (float) 0.3)[0]);
 	}
@@ -1379,7 +1588,7 @@ return array of sums
 	 2 - the end int as string
 	 */
 	
-	public static String[][] fitToPreamble(String cryptString, String[] preambleBinaryTokens) {
+	private static String[][] fitToPreamble(String cryptString, String[] preambleBinaryTokens) {
 		
 		//String[] encryptedPreamble = encrypt_bins(preambleBinaryTokens, 8, (float) 0.3); //TODO FIXUP
 		
@@ -1488,7 +1697,7 @@ return array of sums
 		return new String[][] {new_combined, new String[] {String.valueOf(start)}, new String[] {String.valueOf(end)}}; //~pay the cost to be the boss~ - James Brown
 	}
 	
-	public static String[] getcryptfromblock(String[] cipherblock, int start, int end) { //TODO FINISH
+	private static String[] getcryptfromblock(String[] cipherblock, int start, int end) { //TODO FINISH
 		//System.out.println("CRYPTRECOVER START > " + start);
 		//System.out.println("CRYPTRECOVER END > " + end);
 		String[] ret = new String[end-start];
@@ -1519,7 +1728,7 @@ return array of sums
 		return ret;
 	}
 	
-	public static String[] unshufflecipherblock(String cipherblock, float ratio, int start, int end, int blocklength) {
+	private static String[] unshufflecipherblock(String cipherblock, float ratio, int start, int end, int blocklength) {
 		/*
 		int[] replaces = generate_replacement_indices_for(ratio, start, end, blocklength); //TODO FIXUP
 		
@@ -1544,7 +1753,7 @@ return array of sums
 		return cryptstring_to_array(cipherblock); //TODO FIX CIPHER SHUFFLE
 	}
 	
-	public static String[] cryptstring_to_array(String crypt) {
+	private static String[] cryptstring_to_array(String crypt) {
 		String[] bigcrypt;
 		int ct = 0, last = 0;
 		for (int i = 0; i < crypt.length(); i++) if (Character.isLetter(crypt.charAt(i))) ct++;
@@ -1564,7 +1773,7 @@ return array of sums
 		
 	}
 	
-	public static int[] generate_replacement_indices_for(float ratio, int start, int end, int cipherblocklength) {
+	private static int[] generate_replacement_indices_for(float ratio, int start, int end, int cipherblocklength) {
 		int[] finalindices = new int[cipherblocklength];
 		int[] toswap = new int[cipherblocklength];
 		int[] freenums = new int[cipherblocklength];
@@ -1628,7 +1837,7 @@ return array of sums
 		return toswap;
 	}
 	
-	public static String char_arr_to_str(char[] chars) {
+	private static String char_arr_to_str(char[] chars) {
 		String ret = "";
 		
 		for (char c : chars) ret+= c;
@@ -1636,7 +1845,11 @@ return array of sums
 		return ret;
 	}
 	
-	public static String inputfixup(String phrase) {
+	/*
+	 * Remap input of collisions to different characters from extended ASCII
+	 */
+	
+	private static String inputfixup(String phrase) {
 		
 		char[] altphrase = phrase.toCharArray();
 		for (int i = 0; i < phrase.length(); i++) {
@@ -1846,6 +2059,7 @@ return array of sums
 							System.out.println(encrypted[0]);
 							System.out.println(encrypted[1]+"degsR\\\\"+ratio+"\\\\"+8);
 							System.out.println(">--- END, PLEASE KEEP FOR YOUR RECORDS ---<\n\n");
+							verified = true;
 						} else {
 							verified = false;
 							System.out.println("VERIFICATIONMISMATCH!");
@@ -1986,6 +2200,7 @@ return array of sums
 							System.out.println(encrypted[0]);
 							System.out.println(encrypted[1]+"degsR\\\\"+ratio+"\\\\"+8);
 							System.out.println(">--- END, PLEASE KEEP FOR YOUR RECORDS ---<\n\n");
+							verified = true;
 						} else {
 							verified = false;
 						}
@@ -2230,8 +2445,9 @@ return array of sums
 		input.close();
 	}
 	
+	/* run internal when public */
 	
-	public static void main(String args[]) {
+	private static void main(String args[]) {
 		repl();
 		//generate_replacement_indices_for((float) 0.8, 28, 56, 256);
 		

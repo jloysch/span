@@ -86,7 +86,7 @@ public class Adversary {
 	public static void main(String args[]) throws NumberFormatException{
 		
 		try {
-		go();
+		//go();
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
