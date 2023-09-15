@@ -403,6 +403,157 @@ public class SPAN {
 		return pair;
 	}
 	
+	
+	/**
+	 * decrypt() public access for decrypting SPAN ciphers
+	 * 
+	 * key in the form of //18.229193D0.888R116S123F\\ (e.g.)
+	 * 
+	 * cipher in full form, no newlines or etcetera
+	 */
+	
+	public static String decrypt(String cipher, String key) {
+		
+		/*
+		System.out.println("Please enter the cipher >>");
+		String cipher = input.next();
+		System.out.println("Please enter your decrypt key in the format '//...\\\\");
+		choice = input.next();
+		*/
+		
+		String reformatted = key.substring(2, key.length()-2); //Chop off
+		
+		//System.out.println("CHOP > " + reformatted);
+		
+		//String crypt, int blocksize, float TRI_RATIO, float start
+		
+		//String[] res = decrypt_string (reformatted, r deg start)
+		
+		//   //38.184643D0.888R153S159F\\ - suggested format, also implies it's shrinking something in so it's a SPAN key!
+		
+		int blck_ct = 0;
+		String[] tokens = new String[4];
+		int lastindex = 0;
+		
+		for (int i = 0; i < reformatted.length(); i++) { //2nd pass format and transfer
+			if (Character.isLetter(reformatted.charAt(i))) {
+
+				tokens[blck_ct++] = reformatted.substring(lastindex, i);
+				lastindex = i+1;
+			}
+		}
+		
+		/*
+		 * tokens:
+		 * 	0 - degree
+		 * 	1 - ratio
+		 * 	2 - start
+		 * 	3 - end
+		 */
+		
+		/*
+		for (String s : tokens) {
+			System.out.println("KEYTOK > " + s);
+		}
+		*/
+		
+		/*
+		//String[] ciphertokens = cryptstring_to_array(cipher);
+		//String[] mintokens = new String[Integer.parseInt(tokens[3])-Integer.parseInt(tokens[2])];
+		//int mintokstep = 0;
+		
+		//for (int i = Integer.parseInt(tokens[2]); i < Integer.parseInt(tokens[3]); i++) { //copy over minimum
+		//	mintokens[mintokstep++] = ciphertokens[i];
+		}
+		
+		String recollectedmintok = "";
+		
+		for (String s : mintokens) recollectedmintok += s + "A"; //TODO Check if missing block labels again for whatever reason
+		
+		//TODO AGAIN, FIX BLOCK LABELS?! Depending on how I implement how I want it to go next I jut may not..
+		*/
+		
+		/*
+		 * decrypt_string(String crypt, int blocksize, float TRI_RATIO, float start)
+		 */
+		
+		//TODO BIG TODO JUST MAKE THE BLOCKSIZE 8 ?!
+		
+		//System.out.println("MIN > " + recollectedmintok);
+		
+		//String[] res = decrypt_string (recollectedmintok, 8, Float.parseFloat(tokens[1]), Float.parseFloat(tokens[0]));
+	
+		/*
+		System.out.println("Cryptfromblockstart = " + tokens[2]);
+		System.out.println("Cryptfromblockend = " + tokens[1]);
+		*/
+		
+		String[] cipherasarray = cryptstring_to_array(cipher);
+		
+		
+		
+		char blockdenoter = 'A'; //TODO BLOCKPADFIXUP
+		
+		for (int i = 0; i < cipherasarray.length; i++) {
+			
+			if (!((cipherasarray[i].charAt( cipherasarray[i].length()-1) == blockdenoter))) {
+				cipherasarray[i] = cipherasarray[i] + blockdenoter;
+			}
+		}
+		
+		/*
+		for (String s : cipherasarray) {
+			System.out.println("CIPHERTOKENTOARRAY> " + s);
+		}
+		*/
+		
+		
+		
+		String[] getCryptFromBlock = getcryptfromblock(cipherasarray, Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
+		
+		//System.out.println("CRYPTFROMBLOCK > " + getCryptFromBlock[0]);
+		
+		String getcrypt = "";
+		
+		for (String s : getCryptFromBlock) {
+			getcrypt += s;
+		
+		}
+		
+		/*
+		System.out.println("CRYPT_BASE_PHRASE_FROM_GET > " + getcrypt);
+		
+		System.out.println("USE RATIO " + Float.parseFloat(tokens[1]));
+		System.out.println("USE BLOCK " + 8);
+		System.out.println("USE DEGREE " + Float.parseFloat(tokens[0]));
+		
+		*/
+		
+		
+		String[] decrypted = decrypt_string(getcrypt, 8, Float.parseFloat(tokens[1]), Float.parseFloat(tokens[0])); //TODO STATIC BLOCKSIZE????!! 8?!
+		
+		//System.out.println("\nDECRYPTION OUTPUT >\n");
+		String dcstr = "";
+		for (String s : decrypted) {
+			//System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+			dcstr += binary_to_char(sum_to_binary(Integer.parseInt(s)));
+		}
+		//System.out.println("\nASSTR >\n" + dcstr);
+		
+		//System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
+		
+		/*
+		System.out.println("\nDECRYPTION OUTPUT >\n");
+		
+		for (String s : res) { 
+			System.out.println("\t" + s + " >> " + binary_to_char(sum_to_binary(Integer.parseInt(s))));
+		}
+		System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
+		*/
+		
+		return dcstr;
+	}
+	
 	//INTERNAL METHOD 
 	private static LinkedList encrypt(String rawbinary, int blocksize, float ratio, float degree, int blocknumber){ 
 		String data = rawbinary;
@@ -750,7 +901,7 @@ public class SPAN {
 	
 	//returns sum of the tokens it got back
 	
-	public static int[] decrypt_manual(String crypt, float R, double start) {
+	private static int[] decrypt_manual(String crypt, float R, double start) {
 		String[] crypt_tokens = new String[1]; //TODO PLEASE CHANGE THIS IS JUST BCS IM ANNOYED, NEEDS TO BE EXACT LENGTH
 		crypt_tokens[0] = crypt;
 		
@@ -1290,7 +1441,7 @@ public class SPAN {
 return array of sums
 	 */
 	
-	public static String[] decrypt_string(String crypt, int blocksize, float TRI_RATIO, float start) {
+	private static String[] decrypt_string(String crypt, int blocksize, float TRI_RATIO, float start) {
 		String ret = "";
 		
 		//34.7595A79.20002A14.227916A136.948A106.44044A
@@ -1503,7 +1654,7 @@ return array of sums
 		}
 		
 		
-		System.out.println("FATAL! UNPARSEABLE BIN '" + bin+"' BINNUM > RETURNING NULL FOR '" + bin + "'");
+		//System.out.println("FATAL! UNPARSEABLE BIN '" + bin+"' BINNUM > RETURNING NULL FOR '" + bin + "'");
 		
 		return '\0'; //next-best next to null
 		
@@ -1568,14 +1719,33 @@ return array of sums
 	 * generate random data that we will encrypt and pass back to sender
 	 */
 	
+	//TODO UNIFY ALPHABET REFERENCES IN PROGRAM
+	
+	private static final String SPAN_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~`!@#$%^&*()_-+={[}]|\\";
+	
+	private static boolean isInAlphabet(char c) {
+		for (int i = 0; i < SPAN_ALPHABET.length(); i++) {
+			if (SPAN_ALPHABET.charAt(i) == (c)) return true;
+		}
+		return false;
+	}
 	private static String[] generatePreambleFor(int size) {
 		String preambleDataPre = "";
-		char c;
+		char c = '\0';
+		boolean okaychar = false;
+		
 		for (int i = 0; i < size; i++) {
-			 c = generateRandomChar();
+			
+			while (!okaychar) {
+				c = generateRandomChar();
+				okaychar = isInAlphabet(c);
+			}
+			
 			preambleDataPre += c;
 			
-			//System.out.println("CHOOSE > " + c);
+			System.out.println("CHOOSE > " + c);
+			
+			okaychar = false;
 		}
 		return cryptstring_to_array(encrypt_bins(to_padded_list(to_binary_list(preambleDataPre)), 8, (float) 0.3)[0]);
 	}

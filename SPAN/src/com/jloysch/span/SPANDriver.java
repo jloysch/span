@@ -4,12 +4,19 @@ public class SPANDriver {
 
 	public static void main(String args[]) {
 		
-		//ENCRYPT SPAN.encrypt(String phrase, float ratio, int blocksize, writetofile);
-		String[] pair = SPAN.encrypt("EXAMPLE", (float) 0.888, 8, false);
+		String to_encrypt = "Let's Test This Now!";
+		
+		String[] pair = SPAN.encrypt(to_encrypt, (float) 0.888, 8, false);
+		
+		System.out.println("PLAINTEXT > '" + to_encrypt + "'\n");
 		
 		String cipher = pair[0];
 		String key = pair[1];
 		
-		System.out.println(cipher + "\n\n" + key);
+		System.out.println(cipher + "\n" + key);
+		
+		String decrypt = SPAN.decrypt(cipher, key);
+		
+		System.out.println("\nDECRYPT > '" + decrypt + "'");
 	}
 }

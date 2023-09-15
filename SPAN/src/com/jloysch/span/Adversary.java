@@ -2,95 +2,102 @@ package com.jloysch.span;
 
 public class Adversary {
 	
-	public static String[] blockstr_to_blocks(String str, int blocksize) {
-		String[] ret = new String[str.length()/blocksize];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = str.substring(i*blocksize, i*blocksize + blocksize);
-		}
-		return ret;
+	private static final String BRUTEFORCE_SIM_STR = "HELLO!";
+	
+	public static boolean aPhraseInMyDict(String phrase) { //Simulate attacker checking their result against a dict
+		
+		
+		return (BRUTEFORCE_SIM_STR.equals(phrase));
 	}
 	
-	public static void go() throws NumberFormatException {
-		
-		String tolist = "MY@NAME@IS@JOSH"; //TODO FIX @ for space
-		char aslist[] = new char[tolist.length()];
-		
-		for (int i = 0; i < tolist.length(); i++) {
-			aslist[i] = Character.valueOf(tolist.charAt(i));
-		}
-		
-		//make expected message to crack properly
-		
+	public static void bruteforceSim(String intended_phrase) {
 		boolean cracked = false;
 		
-		float changingRatio = (float) 0.0;
-		float changingDegree = (float) 0.0;
-		int blocksize = 8;
+		String phrase = intended_phrase;
 		
-		int tries = 0;
+		String[] pair = SPAN.encrypt(phrase, (float) 0.888, 8, false); //TODO Allow doubles in and cast in-method
 		
-		String[] bins = SPAN.to_padded_list(SPAN.to_binary_list("MY NAME IS JOSH"));
+		//String key = "//00.000000D0.000R000S000F\\\\";
 		
-		while (!cracked) {
+		
+		
+		
+		final String prefix = "//", postfix = "\\\\";
+		
+		String dc, fakekey;
+		
+		while (!cracked) { //An adversary may cryptanalyze 'likelihoods' to limit their search
 			
-			changingRatio += 0.000001;
-			changingDegree += 0.000001;
 			
-			System.out.println("65.2816A136.60081A139.01712A213.64763A38.62887A99.619354A134.64043A162.92131A24.695885A86.92618A110.23209A173.28201A6.391523A66.10949A107.01292A");
-			System.out.println(changingRatio + "//" + changingDegree);
+			//Let's assume, for now, all ratios are bound as initially intended between (0,1)
 			
-			String[] dc = SPAN.decrypt_string("65.2816A136.60081A139.01712A213.64763A38.62887A99.619354A134.64043A162.92131A24.695885A86.92618A110.23209A173.28201A6.391523A66.10949A107.01292A", blocksize, (float) changingRatio, (float) changingDegree);
-			
-			int t = 0;
-			boolean ok = true;
-			
-			//cracked = true;
-			
-			for (int i = 0; i < dc.length; i++) {
-				if (dc[i] != bins[i]) ok = false;
-				try {
-				System.out.println(">" + SPAN.binary_to_char(SPAN.sum_to_binary(Integer.parseInt(dc[i]))));
-				} catch (Exception e) {
-					
+			for (int blocksize = 8; blocksize < 12; blocksize++) {
+				
+				for (float degree = (float) 10.0; degree < 99.999999; degree+=0.00001) {
+				
+					for (float ratio = (float) .01; ratio < 1.0; ratio+=0.00001) {
+				
+						for (int start = 0; start < 256; start++) {
+		
+							for (int finish = start+1; finish < 256; finish++) {
+								
+								fakekey = prefix + degree + "D" + ratio + "R" + start + "S" + finish + "F" + postfix;
+								
+								//System.out.println("KEY > " + fakekey);
+								
+								
+								try {
+									dc = SPAN.decrypt(pair[0], fakekey);
+									
+									if (dc != null) {
+										if (aPhraseInMyDict(SPAN.decrypt(pair[0], fakekey))) {
+											System.out.println("FOUND!");
+											System.exit(100);
+										} else {
+											System.out.println("KEY " + fakekey + " FAILED >> INCORRECT '" + dc + "'");
+										}
+									} else {
+										System.out.println("KEY " + fakekey + " FAILED >> INCORRECT '" + dc + "'");
+									}
+								
+								} catch (Exception e) {
+									System.out.println("KEY " + fakekey + " FAILED >> BROKEN BLOCK");
+								}
+								
+							}
+							
+						}
+					}
 				}
 			}
-			
-			/*
-			for (String d : dc) {
-				
-					System.out.println("DECRYPT DC > " + d);
-					
-					try {
-					System.out.println(SPAN.sum_to_binary(Integer.parseInt(d)));
-					System.out.println( Integer.toString(Integer.parseInt(d)));
-					System.out.println(SPAN.binary_to_char(SPAN.sum_to_binary(Integer.parseInt(d))));
-					
-					
-					
-					} catch (Exception e) {
-						
-					}
-				
-					//System.out.println("EXPECT")
-				
-			}
-			*/
-			
-			if (ok) cracked = true;
-			System.out.println("SURVIVED " + tries++ + " TIMES.");
+
 		}
+	}
+	
+	public static void useWrongKeyForPlaintext(String to_encrypt) {
+		//String to_encrypt = "Let's Test This Now!";
 		
+		String[] pair = SPAN.encrypt(to_encrypt, (float) 0.888, 8, false);
 		
+		System.out.println("PLAINTEXT > '" + to_encrypt + "'\n");
+		
+		String cipher = pair[0];
+		//String key = pair[1];
+		String key = "//20.138517D0.888R111S131F\\\\";
+		
+		System.out.println(cipher + "\n" + key);
+		
+		String decrypt = SPAN.decrypt(cipher, key);
+		
+		System.out.println("\nDECRYPT > '" + decrypt + "'");
 	}
 	
 	public static void main(String args[]) throws NumberFormatException{
 		
-		try {
-		//go();
-		} catch (Exception e) {
-			//e.printStackTrace();
-		}
 		
+		//useWrongKeyForPlaintext("Let's Test This!");
+		
+		bruteforceSim(BRUTEFORCE_SIM_STR);
 	}
 	
 
