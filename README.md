@@ -42,3 +42,10 @@ At a rate of 2^32 calculations/s for bruteforce it would take about 4.25yrs to g
 then they would receive a phrase that they believe to br whatever it is they're looking for. This may or may not be the case. The attacker would need to keep track of every generated possibility and run it against some dictionary to generate the most likely keys. This would take an uncalculated amount of time, including permutations and an unknown length as well as other factors. A user will have changed their password by then.
 
 SPAN's intent is to encrypt data quickly and safely while not being too costly. If you store some secret in there such as a password, and the attacker manages to get your cipher and not the key, then that could actually be useless; what they're left with is possible passwords you could've used that is as good as their likely keys they've generated. SPAN would allow data to be intercepted and still be safe since the attacker can't prove for sure what was encrypted with SPAN unless they plug that secret data into whatever resource they're trying to access.
+
+DEBUG OUTPUT 9/16/2023
+
+> 'HELLO' > 716805 unique, 2109887 bad blocks, 0 collisions, 3 bad generations, run 2826692 @ 25.358442% find rate. | t=3680.911s
+
+I have an algorithm to see how many unique generations there are for a particular phrase. For 'HELLO' with a static ratio there are at least 716,805 unique generations (stopped due to laptop limitations) with 0 ciphers repeated during this test and 3 bad ciphers generated (errored generations / erroneous)
+There is about a 1 in 4 chance of finding a block that will work so the algorithm runs until it verifies (about 4 times max per legitamate generation)
