@@ -645,7 +645,7 @@ public class SPAN {
 		System.out.println("Cryptfromblockend = " + tokens[1]);
 		*/
 		
-		System.out.println("CIPHER > " + cipher);
+		//System.out.println("CIPHER > " + cipher);
 		String[] cipherasarray = cryptstring_to_array(cipher);
 		
 		
@@ -2419,7 +2419,8 @@ return array of sums
 			full_new_index[i] = placements.get(i);
 		}
 		
-		System.out.println("FUNC = " + derivedfunc + "X...");
+		//System.out.println("FUNC = " + derivedfunc + "X...");
+		
 		//use while loop to populate new array of indexes from function
 		
 		return full_new_index; //Returns 256 swap indices
@@ -3220,9 +3221,10 @@ return array of sums
 		return ret;
 		
 	}
-	public static void main(String args[]) {
+	
+	private static void testshufflealt() {
 		//test_shuffle();
-		
+
 		String phrase = "HELLO";
 		
 		String[][] encrypt = encrypt_shuffled(phrase, 0.888f, 8, false);
@@ -3241,7 +3243,80 @@ return array of sums
 		}
 		
 		System.exit(0);
+	}
+	
+	private static void countUnique(String phrase) {
+		int uniques = 0;
+		HashMap<String, String> unique= new HashMap <String, String>();
+		LinkedList collisions = new LinkedList();
 		
+		HashMap <String, String> badblocks = new HashMap <String, String>();
+		
+		HashMap <String, String> badgenerations = new HashMap <String, String>();
+		
+		int fails = 0, collided=0, runs=0;
+		String comp = "", decrypt="";
+		String[][] encrypt = null;
+		
+		long startTime = System.currentTimeMillis();
+		
+		while (true) {
+			try {
+				//test_shuffle();
+				encrypt = encrypt_shuffled(phrase, 0.888f, 8, false);
+			
+				
+				
+				//System.out.println("TRYING DECRYPT");
+				decrypt = SPAN.decrypt_shuffled(encrypt[0], encrypt[1][0]);
+				
+				comp = "";
+				
+				for (String s : encrypt[0]) comp+=s;
+				
+				
+				//System.out.println("DECRYPT DC > '" + decrypt + "'");
+				//System.out.println("KEY > '" + encrypt[1][0] + "'");
+				if (decrypt.equals(phrase)) {
+					//System.out.println("VERIFIED!");
+					
+					
+					
+					if (unique.get(comp) == null) {
+						unique.put(comp, encrypt[1][0]);
+						uniques++;
+						//System.out.println("Unique encryption for '" + phrase + "' found. (Run " + runs + ")");
+					} else {
+						collisions.add(comp);
+						collisions.add(encrypt[1][0]);
+						collided++;
+						//System.out.println("\tCollision on run " + runs);
+					}
+				} else {
+					//System.out.println("MISMATCH!");
+					//System.out.println("Bad block (Run " + runs +")");
+					badblocks.put(comp, encrypt[1][0]);
+					fails++;
+				}
+				runs++;
+				
+				/*
+				System.out.println("'" + phrase + "' > " + uniques + " unique, " + fails + " bad blocks, " + collided + " collisions, " + badgenerations.size() + " bad generations, " + "run " + runs + " @ " + ((float)uniques/(float)runs)*100 + "% find rate. | t=" 
+				+ ((System.currentTimeMillis()-startTime)/1000f) + "s");
+				//System.exit(0);
+				 * 
+				 */
+				System.out.println(uniques + ":" + runs);
+			} catch (Exception e) {
+				System.out.println("Passing error on run " + runs);
+				badgenerations.put(comp, encrypt[1][0]);
+			}
+		}
+	}
+	
+	public static void main(String args[]) {
+		
+		countUnique("HELLO");
 	}
 
 }
