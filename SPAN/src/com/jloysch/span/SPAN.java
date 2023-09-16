@@ -2082,7 +2082,7 @@ return array of sums
 			count++;
 		}
 		
-		if (count >= 255) return 255;
+		if (count >= 255) return 255; //TODO arr length, DEBUG purposes..
 		
 		return count;
 	}
@@ -3300,17 +3300,16 @@ return array of sums
 				}
 				runs++;
 				
-				/*
+				
 				System.out.println("'" + phrase + "' > " + uniques + " unique, " + fails + " bad blocks, " + collided + " collisions, " + badgenerations.size() + " bad generations, " + "run " + runs + " @ " + ((float)uniques/(float)runs)*100 + "% find rate. | t=" 
 				+ ((System.currentTimeMillis()-startTime)/1000f) + "s");
 				//System.exit(0);
-				 * 
-				 */
-				System.out.println(uniques + ":" + runs);
+			
+				//System.out.println(uniques + ":" + runs);
 			} catch (Exception e) {
 				System.out.println("Passing error on run " + runs);
 				badgenerations.put(comp, encrypt[1][0]);
-			}
+				System.out.println("Passing..");			}
 		}
 	}
 	
