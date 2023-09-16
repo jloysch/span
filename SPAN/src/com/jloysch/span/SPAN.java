@@ -3510,7 +3510,7 @@ return array of sums
 		int[] replace = generate_replacement_indices_for((float) 20.846723, (float) 0.888, 118, 200);
 		//System.out.println("INDICE ARRAY >");
 		for (int i : replace) {
-			//System.out.println(i);
+			//System.out.println(i);!
 		}
 		
 		String[] test = SPAN.encrypt("HELLO", (float) 0.888, 8, false);
