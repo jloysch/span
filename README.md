@@ -60,4 +60,4 @@ DEBUG OUTPUT 9/16/2023
 > 'HELLO' > 716805 unique, 2109887 bad blocks, 0 collisions, 3 bad generations, run 2826692 @ 25.358442% find rate. | t=3680.911s
 
 I have an algorithm to see how many unique generations there are for a particular phrase. For 'HELLO' with a static ratio there are at least 716,805 unique generations (stopped due to laptop limitations) with 0 ciphers repeated during this test and 3 bad ciphers generated (errored generations / erroneous)
-There is about a 1 in 4 chance of finding a block that will work so the algorithm runs until it verifies (about 4 times max per legitamate generation)
+There is about a 1 in 4 chance of finding a block that will work so the algorithm runs until it verifies the block and returns it to you (about 4 times max per legitamate generation)
