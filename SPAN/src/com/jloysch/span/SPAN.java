@@ -1,9 +1,4 @@
 package com.jloysch.span;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
 /*
  * @Author: Joshua Loysch
  * All Rights Reserved
@@ -32,6 +27,10 @@ import java.util.HashMap;
  * 
  * Theoretical complexity of 2^129+3.194e^38 to start seems incredible. >.>
  */
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
@@ -39,24 +38,28 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SPAN {
 	
-	private static float TRI_RATIO_FINAL = (float) 0.86;
+	private static float TRI_RATIO_FINAL = (float) 0.86; //INTERNAL - TESTVAR
+	
+	/** 
+	 * [Internal Method] binary_to_sum
+	 * @param binary_representation (String) The Binary Representation of a Particular Character
+	 * @return (Integer) The Binary Sum of The Particular Character
+	 */
 	
 	private static int binary_to_sum(String binary_representation) {
-		/*
+		
+		/* OLD METHOD OF REPRESENTATION
 		int sum = 0;
 		char[] chars = binary_representation.toCharArray();
 		
-		for (int i = 0; i < binary_representation.toCharArray().length; i++) {
-			
-			if (chars[i] == '1') sum+= Math.pow(2, i);
-			
-		}
-		
+		for (int i = 0; i < binary_representation.toCharArray().length; i++)  if (chars[i] == '1') sum+= Math.pow(2, i);
+	
 		chars = null;
 		
 		return sum;
 		*/
-		/*
+		
+		/* ALTERNATE METTHOD OF BINDING, TODO LATER IMPLEMENTATIONS & FORMUULAS
 		if (binary_representation.equals("000000000000")) return 0;
 		if (binary_representation.equals("100000000000")) return 1;
 		if (binary_representation.equals("010000000000")) return 2;
@@ -67,17 +70,20 @@ public class SPAN {
 		if (binary_representation.equals("111000000000")) return 7;
 		if (binary_representation.equals("000100000000")) return 8;
 		if (binary_representation.equals("100100000000")) return 9;
-		
+		if (binary_representation.equals("10100000")) return 385; //P
+		if (binary_representation.equals("11100000")) return 386; //p
+		System.out.println(binary_representation + " >>> " + binary_representation);
 		*/
-		//System.out.println(binary_representation + " >>> " + binary_representation);
-		
-		//if (binary_representation.equals("10100000")) return 385; //P
-		///if (binary_representation.equals("11100000")) return 386; //p
-		
-		
 		
 		return Integer.parseInt(binary_representation,2);
 	}
+	
+	
+	/**
+	 * [Internal Method] degree_to_radian
+	 * @param degrees (Float) The angle in degrees.
+	 * @return (Double) The passed angle in radians.
+	 */
 	
 	private static double degree_to_radian(float degrees) {
 		//0.0174533 | 1° × π/180 = 0.01745rad
@@ -87,14 +93,16 @@ public class SPAN {
 		return rads;
 	}
 	
+	/** 
+	 * [Internal Method] find_some_x
+	 * @param mod (Float) The modulus, m, to generate some representative triangle, T.
+	 * @param degree_obsf (Float) The degree at which our representative triangle, T, operates. Range (0,90f).
+	 * @return (Float) Some X at which we can satisfy conditions for T.
+	 */
 	
 	private static float find_some_x(float mod, float degree_obsf) { //Correct and verified
 	
 		//C^2 = A^2 + B^2 - 2ab*cosC
-		
-		
-		
-		//* double vs float
 		
 		float c2, c;
 		
@@ -109,8 +117,13 @@ public class SPAN {
 		c = (float) Math.sqrt(c2);
 		
 		return c; 
-		
 	}
+	
+	/**
+	 * [Internal Method] 
+	 * Generate a pseudo-random degree at instantaneous time T. 
+	 * @return (Float) a degree in the range (0, 90f)
+	 */
 	
 	private static float generate_some_degree() {
 		
@@ -137,9 +150,21 @@ public class SPAN {
 		return num;
 	}
 	
-	private static void make_triangle() { //TODO Complete later
+	/* ANIMATION FOR ENCRYPTION
+	private static void make_triangle() { //TODO Complete later, possibly...
 		
 	}
+	*/
+	
+	/**
+	 * [Internal Method] next_degree - ANGLE STEPPING FORMULA F1
+	 * Generate the next degree for a the given the start, the ratio, and the iteration (degree of increment). 
+	 * All results returned are based on the ANGLE STEPPING FORMULA F1.
+	 * @param start - (Float) The start degree.
+	 * @param ratio - (Float) The ratio for stepping.
+	 * @param iteration (Integer) Which function of (iteration) the formula will return.
+	 * @return (Float) The next angle with respect to the start angle;
+	 */
 	
 	private static float next_degree(float start, float ratio, int iteration) {
 		//start + (start*ratio - start%ratio) = diff
@@ -155,6 +180,14 @@ public class SPAN {
 		return next;
 	}
 	
+	/**
+	 * [Internal Method] decrypt_shuffled
+	 * Decrypts a cipher that has been shuffled given the shuffled cipher as a String and the key as a String.
+	 * @param phrase (String) The cipher that has been shuffled.
+	 * @param key (String) The key for the cipher in the format //..D..R..S..F..\\
+	 * @return
+	 */
+	
 	public static String decrypt_shuffled(String phrase, String key) {
 		
 		
@@ -167,48 +200,19 @@ public class SPAN {
 		String[] keytoks = new String[4];
 		int keyct = 0;
 		int last = 0;
-		//System.out.println("KEY + '" + key + "'");
 		
 		for (int i = 0; i < key.length(); i++) {
 			if (Character.isLetter(key.charAt(i))) {
 				keytoks[keyct++] = key.substring(last, i);
 				last = i + 1;
 			}
-			
 		}
-		
-	
-		
-		/*
-		for (String s : keytoks) {
-			System.out.println("KEYTOK > " + s);
-		}
-		*/
 		
 		float degree = Float.parseFloat(keytoks[0]);
 		float ratio = Float.parseFloat(keytoks[1]);
 		int start = Integer.parseInt(keytoks[2]), end = Integer.parseInt(keytoks[3]);
 		
 		int[] replace = generate_replacement_indices_for(degree, ratio, start, end);
-		//System.out.println("INDICE ARRAY >");
-		for (int i : replace) {
-			//System.out.println(i);
-		}
-		
-		//String[] test = SPAN.encrypt("HELLO", (float) 0.888, 8, false);
-		
-		//String[] ciphertokens = cipherblocks; //TODO CHECK BLOCK LABELS
-			
-		//String[] shuffle = shufflecipherblock(ciphertokens, replace);
-		/*
-		for (String s : shuffle) {
-			System.out.println("SHUFFLE > " + s);
-		}
-		
-		for (int r : replace) {
-			System.out.println("REPLACE " + r);
-		}
-		*/
 		
 		String[] ciphertokens = phrase.split("A"); //TODO CHECK LABELS
 		for (int i = 0; i < ciphertokens.length; i++) ciphertokens[i] = ciphertokens[i] + 'A';
@@ -216,36 +220,41 @@ public class SPAN {
 		String[] unshuffle = unshufflecipherblock(ciphertokens, replace); //TODO Externalize to derive func just testing
 		
 		String test_str = "";
-		for (String s : unshuffle) {
-			//System.out.println("UNSHUFFLE > " + s);
-			test_str += s;
-		}
-		
-		//test decrypt moment of truth
+		for (String s : unshuffle) test_str += s;
 		
 		/*
 		 * TODO ADD PRE POSTFIX BACK
 		 */
 		
 		key = "//" + key + "\\\\"; //TODO CHECK
-		//System.out.println("KEY DC'" + key + "'");
-		//System.out.println("TESTSTR > " + test_str);
+		
 		String dc = decrypt(test_str, key);
-		//String dc = null;
-		//System.out.println("DECRYPT > '" + dc + "'");
 		
 		return dc;
 	}
 	
+	//TODO ADDRESS ACCESS TO decrypt() 
+	
+	/**
+	 * [Internal Method] decrypt, used as helper/in-between
+	 * Returns an integer array of the sum of the decryption tokens that can be converted back to plaintext
+	 * @param crypt_tokens (String[]) The cipher as a String array in the form of ['12.43423A'...]
+	 * @param R (Float) The ratio at which to operate at.
+	 * @param degree_obsf (Float) The degree at which to operate at.
+	 * @return (Integer[]) The sums of the decryption tokens from the given cipher.
+	 */
+	
 	private static int[] decrypt(String[] crypt_tokens, float R, float degree_obsf) {
+		
 		
 		int dec_tokens[] = new int[crypt_tokens.length];
 		
 		//TODO make array have tokens seperate
 		
-		for (String s : crypt_tokens) {
-			//System.out.println("CRYPT > " + s);
-		}
+		/*
+		for (String s : crypt_tokens)  System.out.println("CRYPT > " + s);
+		*/
+		
 		int step = 0;
 		//System.out.println("DECRYPT");
 		
@@ -267,23 +276,23 @@ public class SPAN {
 				res = (float) 1.0;
 			}
 			*/
-			
-			
-			
+
 			int fres = (int) Math.round(res); // demote after round :]
 			
 			//System.out.println(res + " >RND> " + fres);
 			dec_tokens[step++] = fres;
 		}
 		
-		//System.out.println("DECRYPT");
-		/*
-		for (int in : dec_tokens) {
-			//System.out.println(in);
-		}
-		*/
+
 		return dec_tokens;
 	}
+	
+	/**
+	 * [Internal Method] generate_test_string
+	 * @param block_size (Integer) EXPECTS 8* WILL ADDRESS IN FUTURE VERSIONS
+	 * @param blocks (Integer) EXPECTS 256* WILL ADDRESS IN FUTURE VERSIONS
+	 * @return String String of random binary.
+	 */
 	
 	public static String generate_test_string(int block_size, int blocks) {
 		String gen = "";
@@ -299,25 +308,25 @@ public class SPAN {
 	
 	
 	/**
-	 * 
-	 * @param phrase
-	 * @param ratio
-	 * @param blocksize
-	 * @param writetofile
-	 * @return encrypt[0] blocks, encrypt[1][0] key
+	 * [Internal Method] encrypt_shuffled
+	 * @param phrase (String) The phrase which to encrypt.
+	 * @param ratio (Float) The ratio at which to encrypt it.
+	 * @param writetofile (Boolean) write locally to file. *DEBUG PUROSES.*
+	 * @return String[][] where encrypt[0] are the (String[]) Blocks, encrypt[1][0] is the (String) Key.
 	 */
-	public static String[][] encrypt_shuffled(String phrase, float ratio, int blocksize, boolean writetofile) {
+	
+	public static String[][] encrypt_shuffled(String phrase, float ratio, boolean writetofile) {
 		boolean ok = false;
+		
+		final int blocksize = 8; //TODO CHECK IMPLEMENTATIONS
 		
 		while (!ok) { //TODO Code cleanup
 			
 			try {
 				String[] encrypt = encrypt(phrase, ratio, blocksize, writetofile);
-				
-				
+						
 				//System.out.println("INDICE ARRAY >");
-				
-				
+
 				String key = encrypt[1];
 				key = key.substring(2, key.length()-2);
 				String[] keytoks = new String[4]; //reformat key to get vals
@@ -330,7 +339,6 @@ public class SPAN {
 						keytoks[keyct++] = key.substring(last, i);
 						last = i + 1;
 					}
-					
 				}
 				
 				/*
@@ -338,8 +346,11 @@ public class SPAN {
 					System.out.println("KEYTOK > " + s);
 				}
 				*/
+				
 				float degree = Float.parseFloat(keytoks[0]);
-				//float ratio = Float.parseFloat(keytoks[1]);
+				
+				//float ratio = Float.parseFloat(keytoks[1]); -- Not needed, in method
+				
 				int start = Integer.parseInt(keytoks[2]), end = Integer.parseInt(keytoks[3]);
 				
 				//System.out.println("KEY > " + key);
@@ -351,6 +362,10 @@ public class SPAN {
 				String[] ciphertokens = encrypt[0].split("A"); //TODO CHECK BLOCK LABELS
 					
 				String[] shuffle = shufflecipherblock(ciphertokens, replace);
+				
+				/*
+				 * DEBUG 
+				 */
 				
 				/*
 				for (String s : shuffle) {
@@ -387,6 +402,11 @@ public class SPAN {
 				
 				//for (String s : ciphertokens) System.out.println(s);
 				//for (int i = 0; i < ciphertokens.length; i++) ciphertokens[i] = ciphertokens[i] + 'A'; //TODO CHECK BLOCK LABELS
+				
+				/*
+				 * END DEBUG
+				 */
+				
 				String shuff = "";
 				for (String s : shuffle) shuff += s;
 				
@@ -398,27 +418,36 @@ public class SPAN {
 				} 
 				
 			} catch (Exception e) {
-				//do nothing, ignore
+				//do nothing, ignore and pass
 			}
 		}
+		
 		return null;
 	}
 	
 	//PUBLIC ACCESSIBLE METHOD
 	
 	/**
-	 * encrypt()
-	 * 
-	 * Take the phrase, ratio, and blocksize and return a String[]
-	 * 
-	 * String[0] = Crypt
-	 * String[1] = Key
-	 * 
+	 * [External Method] encrypt()
+	 * @param phrase (String) The phrase to encrypt.
+	 * @param ratio (Float) The ratio at which to encrypt it.
+	 * @param blocksize (Integer) The blocksize**** WILL BE OVERWRITTEN WITH 8**.
+	 * @param writetofile (Boolean) Write to files locally. DEBUG PURPOSES.
+	 * @return (String[]) The cipher and key where return[0] = cipher and return[1] = key.
 	 */
-	
 	
 	public static String[] encrypt(String phrase, float ratio, int blocksize, boolean writetofile) {
 		String[] pair = new String[2];
+		
+		/*
+		 * TODO FIX BLOCKSIZE FIX FOR ENCRYPTION
+		 */
+		
+		blocksize = 8; //TODO ADDRESS
+		
+		/*
+		 * TODO FIX BLOCKSIZE FIX FOR ENCRYPTION!
+		 */
 		
 		boolean verified = false;				
 		
@@ -427,14 +456,10 @@ public class SPAN {
 			String phraseogswapback = phrase;
 			phrase = inputfixup(phrase); //do number replacements
 			
-			
 			//System.out.println("New Phrase > " + phrase);
 			
 			//String[] bins = to_padded_list(to_binary_list(phrase));
-			
-			
-			
-			
+
 			//System.out.println("NEWPHRASE > " + phrase);
 			
 			String[] bins = to_padded_list(to_binary_list(phrase));
@@ -444,7 +469,6 @@ public class SPAN {
 			/*
 			 * MODIFY PHRASE TO REPLACE 1 WITH 'ONE'
 			 */
-			
 			
 			//System.out.println(encrypt_bins(bins, blocksize, (float) ratio));
 			
@@ -478,7 +502,6 @@ public class SPAN {
 				verified = false;
 			}
 			
-			
 			/*
 			 * NOW HERE IS WHERE WE MAKE IT INTERESTING WITH PHASE 1 ADDITION, THE BLOCK!
 			 */
@@ -491,9 +514,13 @@ public class SPAN {
 			
 			String rawfitencryptnoshufflecu = "";
 			for (String s : bigBlock) {
-				//System.out.println("BLOCK > " + s);
+				//System.out.println("BLOCK > " + s); --debug
 				rawfitencryptnoshufflecu+=s;
 			}
+			
+			/*
+			 * DEBUG / TRANSLATION
+			 */
 			
 			//System.out.println("CRYPT_BASE_PHRASE_PRE_FIT_AND_SHUFFLE > " + encrypted[0]);
 			
@@ -523,10 +550,13 @@ public class SPAN {
 			/* UNSHUFFLE STEP *?
 			 */
 			
-			//TODO FIX SHUFFLING IN BLOCKS
+			//NOLONGERTODO FIX SHUFFLING IN BLOCKS --OK! :)
 			
 			//String[] unshuffledcipher = unshufflecipherblock(cryptstrforshuffle, (float) ratio, Integer.parseInt(cm[1][0]), Integer.parseInt(cm[2][0]), 256 );
 			
+			/*
+			 * END DEBUG / TRANSLATION
+			 */
 			
 			String[] getCryptFromBlock = getcryptfromblock(cm[0], Integer.parseInt(cm[1][0]), Integer.parseInt(cm[2][0]));
 			
@@ -550,6 +580,10 @@ public class SPAN {
 			}
 			
 			/*
+			 * DEBUG / TRANSLATION
+			 */
+			
+			/*
 			System.out.println("\nASSTR > " + dcassstr);
 			
 			System.out.println("\n>--- END DECRYPTION OUTPUT ---<\n");
@@ -568,6 +602,10 @@ public class SPAN {
 			*/
 			
 			//choice = input.next(); 
+			
+			/*
+			 * END DEBUG / TRANSLATION
+			 */
 			
 			if (writetofile) {
 			 try {
@@ -594,11 +632,11 @@ public class SPAN {
 	
 	
 	/**
-	 * decrypt() public access for decrypting SPAN ciphers
+	 * [External Method] decrypt
 	 * 
-	 * key in the form of //18.229193D0.888R116S123F\\ (e.g.)
-	 * 
-	 * cipher in full form, no newlines or etcetera
+	 * @param cipher (String) The cipher in the form '12.483498A213.3498A...'
+	 * @param key (String) the key in the form //18.229193D0.888R116S123F\\ (e.g.)
+	 * @return (String)  The phrase recovered from the cipher.
 	 */
 	
 	public static String decrypt(String cipher, String key) {
@@ -748,8 +786,29 @@ public class SPAN {
 	}
 	
 	//INTERNAL METHOD 
+	
+	/**
+	 * [Internal Method] encrypt
+	 * @param rawbinary (String) The raw binary of the phrase to encrypt.
+	 * @param blocksize (Integer) WILL RESORT TO 8 FOR NOW** WILL ADDRESS!
+	 * @param ratio (Float) The ratio at which to encrypt the phrase.
+	 * @param degree (Float) The degree at which to encrypt the phrase.
+	 * @param blocknumber (Integer) Which block we are operating on** TO BE USED IN FUTURE ADDITIONS > DAISY-CHAINING*
+	 * @return (LinkedList) A LinkedList with (0=(String)cipher,1=(Float) degree,2=(Float[]) degrees,3= (Float) ratio)
+	 */
+	
 	private static LinkedList encrypt(String rawbinary, int blocksize, float ratio, float degree, int blocknumber){ 
 		String data = rawbinary;
+		
+		/*
+		 * TODO ADDRESS BLOCKSIZE FIX IN ENCRYPT-INTERNAL
+		 */
+		
+		blocksize = 8;
+		
+		/*
+		 * TODO ADDRESS BLOCKSIZE FIX IN ENCRYPT-INTERNAL!
+		 */
 		
 		//boolean verbose = false;
 		
@@ -770,13 +829,21 @@ public class SPAN {
 			//System.out.println("Sum[" + i + "] = " + sums[i]);
 		}
 		
-		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		/*
+		 * TODO ALPHABET UNIFICATION -> ENCRYPT-INTERNAL
+		 */
 		
+		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; //TODO UNIFY ALPHABET FOR ENCRYPT-INTERNAL
+		
+		
+		/*
+		 * Blocknumber -> ITERATION in next_degree() can use this for daisychaining, address later.
+		 */
 		
 		if (degree == 0) {
 			degree = generate_some_degree();
 		} else {
-			degree = next_degree(degree, ratio, blocknumber); //Important to know blocknumber because each block is dependent on last
+			degree = next_degree(degree, ratio, blocknumber); //Important to know blocknumber because each block is dependent on last -> DAISYCHAINING LATER**
 		}
 		
 		
@@ -790,7 +857,7 @@ public class SPAN {
 		
 		for (int i = 0; i < sums.length; i++) { //populate sums
 			
-			if (degree == 0) { //TODO INCREMENT
+			if (degree == 0) { //TODO INCREMENT -> ENCRYPT-INTERNAL -> ADDRESS LATER
 				crypt += find_some_x(sums[i], degree);
 				degrees[0] = degree;
 			} else {
@@ -846,6 +913,10 @@ public class SPAN {
 		
 		return values;	
 	}
+	
+	/**
+	 * UNUSED [DEBUG]
+	 */
 	
 	private static void test_a() {
 		//System.out.println(sum_of_data_at_chunk);
@@ -934,6 +1005,8 @@ public class SPAN {
 				decrypt(crypts, ratio, degree);
 	}
 	
+	/*
+	
 	private static boolean verify(int times) {
 		Boolean logs[] = new Boolean[times];
 		
@@ -982,7 +1055,7 @@ public class SPAN {
 				crypts[i] = crypt;
 				crypt = "";
 			}
-			/*
+			/* -- DEBUG SECTION - VERIFY INTERNAL (ALT)
 			System.out.println("DEGREES");
 			
 			for (float f : degrees) {
@@ -996,11 +1069,14 @@ public class SPAN {
 			
 			System.out.println("CRYPT > ") ;
 			System.out.print("\n--BEGIN--\n\t[");
-			for (String s : crypts) {
-				System.out.print(s);
+			for (String s : crypts) System.out.print(s);
 			}
 			System.out.println("]" + "//" + degree + "degsR" +"\n--END--");
-			*/
+			*/// -- END DEBUG SECTION -VERIFY INTERNAL (ALT)
+	
+		
+			/* ----------------UNCOMMENT FOR VERIFY
+			
 			int[] dec_tokens = decrypt(crypts, ratio, degree);
 			
 			logs[a] = true;
@@ -1036,16 +1112,25 @@ public class SPAN {
 		
 		return ok;
 	}
-	
+	*/
+	/*
 	private static void loop_test() {
 		int step = 0;
 		while (verify(1)) {
 			System.out.println(">>>>>>>>>>>>>>>>TRY " + step++ + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		}
 	}
+	*/
+	
+	/**
+	 * [External Method] sum_to_binary
+	 * @param sum (Integer) A number which will be represented in binary.
+	 * @return (String) The binary representation of the sum.
+	 */
 	
 	public static String sum_to_binary(int sum) {
-		/*
+		
+		/* OLD METHOD OF CALCULATION FOR ALTERNATE VALUES
 		int bits = 0;
 		int tempsum = sum;
 		for (int i = 0; i < tempsum; i++) { //silly way to calc bits but should work
@@ -1094,6 +1179,15 @@ public class SPAN {
 	
 	//returns sum of the tokens it got back
 	
+	/**
+	 * [Internal Method] decrypt_manual
+	 * Mainly for testing and debug purposes with noblock, noshuffle only.**
+	 * @param crypt (String) The cipher.
+	 * @param R (Float) The ratio at which to decrypt.
+	 * @param start (Float) The start angle for decryption.
+	 * @return
+	 */
+	
 	private static int[] decrypt_manual(String crypt, float R, double start) {
 		String[] crypt_tokens = new String[1]; //TODO PLEASE CHANGE THIS IS JUST BCS IM ANNOYED, NEEDS TO BE EXACT LENGTH
 		crypt_tokens[0] = crypt;
@@ -1132,7 +1226,8 @@ public class SPAN {
 		return dec_tokens;
 	}
 	
-	private static void test_single() {
+	/*
+	private static void test_single() { //UNUSED
 		//test_a();	
 		
 				//PASS DATA INTO THIS BLOCK BY BLOCK
@@ -1152,6 +1247,7 @@ public class SPAN {
 				values.add(degrees);
 				values.add(ratio);
 				*/
+				/* --DELETE FOR TEST_SINGLE()
 				String crypt = (String) res.get(0);
 				float degree = (float) res.get(1);
 				float[] degrees = (float[]) res.get(2);
@@ -1171,18 +1267,40 @@ public class SPAN {
 				}
 				
 	}
+	*/
 	
+	/*
 	private static void main_test() {
 		encrypt("101110111011", 12, TRI_RATIO_FINAL, 0, 0);
 		TRI_RATIO_FINAL = (float) 0.5;
 		
 		decrypt_manual("782.1675A", TRI_RATIO_FINAL, (double) 14.965881);
 	}
+	*/
+	
+	/**
+	 * [Internal Method] test_manual
+	 * Debugging method.
+	 * @param bits (String) The binary to test.
+	 * @param blocksize (Integer) 8*** WILL ADDRESS IN FUTURE VERSIONS!
+	 * @param triratio (Float) The ratio at which to test at.
+	 * @return (Boolean) Whether or not it was successfully encrypted and decrypted.
+	 */
 	
 	private static boolean test_manual(String bits, int blocksize, float triratio) {
 		LinkedList vals = encrypt(bits, blocksize, triratio, 0, 0);
 		//decrypt_manual((String) vals.get(0), triratio, 3.0);
 		int dec_tok[] = decrypt_manual((String) vals.get(0), triratio, (float) vals.get(1));
+		
+		/*
+		 * TODO ADDRESS BLOCKSIZE FIX IN TEST_MANUAL
+		 */
+		
+		blocksize = 8;
+		
+		/*
+		 * TODO ADDRESS BLOCKSIZE FIX IN TEST_MANUAL!
+		 */
 		
 		System.out.println("BINSUMCHECK> " + binary_to_sum(bits));
 		System.out.println("BINSUMCHECKB> " + dec_tok[0]);
@@ -1233,7 +1351,8 @@ public class SPAN {
 		
 	}
 	
-	private static void loop_until_some_failure_test() {
+	/* 
+	private static void loop_until_some_failure_test() { //OLD / NOW UNUSED
 		boolean error = false; //This one makes me laugh every time I write it
 		int cnt = 0;
 		while (!error) {
@@ -1258,7 +1377,9 @@ public class SPAN {
 			cnt++;
 		}
 	}
+	*/
 	
+	/*
 	private static void loop_until_some_failure_12bitalign() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
@@ -1275,7 +1396,9 @@ public class SPAN {
 		}
 		
 	}
+	*/
 	
+	/*
 	private static void loop_until_some_failure_4bitalign() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
@@ -1292,7 +1415,9 @@ public class SPAN {
 		}
 		
 	}
+	*/
 	
+	/*
 	private static void loop_until_some_failure_4bitalignalt() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
@@ -1309,7 +1434,9 @@ public class SPAN {
 		}
 		
 	}
+	*/
 	
+	/*
 	private static void loop_until_some_failure_6bitalign() { //Can proces a chunk of up to 12 bits
 		boolean error = false;
 		int CNT = 0;
@@ -1326,7 +1453,9 @@ public class SPAN {
 		}
 		
 	}
+	*/
 	
+	/*
 	private static void loop_until_some_failure_3bitalign() { //RAISES ERRORS on 3 BIT DO NOT USE
 		boolean error = false;
 		int CNT = 0;
@@ -1343,7 +1472,9 @@ public class SPAN {
 		}
 		
 	}
+	*/
 	
+	/*
 	private static void loop_until_some_failure_8bitalign() { //RAISES ERRORS on 3 BIT DO NOT USE
 		boolean error = false;
 		int CNT = 0;
@@ -1361,13 +1492,22 @@ public class SPAN {
 		
 	}
 	
-	private static void hello() {
-		//01001000 01000101 01001100 01001100 01001111
-		
-		
-	}
+	*/
 	
-	public static String to_binary_string(String phrase) {
+	
+	
+	
+		//HELLO = 01001000 01000101 01001100 01001100 01001111
+		
+		
+	
+	/**
+	 * [External Method] to_binary_string
+	 * @param phrase (String) The phrase to represent as binary in a String.
+	 * @return (String) The phrase as binary in a String.
+	 */
+	
+	public static String to_binary_string(String phrase) { 
 		String ret = "";
 		/*
 		if (phrase.equals("p")) return "11100001"; 
@@ -1386,6 +1526,13 @@ public class SPAN {
 		
 		return ret;
 	}
+	
+	/**
+	 * [External Method]
+	 * Create binary list from phrase, for each char it'll create an entry in binary.
+	 * @param phrase (String) The phrase to convert to a list of binary per character.
+	 * @return (String[]) The String[] of binary.
+	 */
 	
 	public static String[] to_binary_list(String phrase) { //TODO LOOK
 		//String numbers = "0123456789";
@@ -1469,6 +1616,17 @@ public class SPAN {
 		return ret;
 	}
 	
+	/*
+	 * TODO ADDRESS PADDING IN to_padded_list!
+	 */
+	
+	/**
+	 * [External Method]
+	 * Converts a binary list created in SPAN to an even pad.
+	 * @param binary_list (String[]) The list of binary to pad.
+	 * @return (String[]) Padded String[] of same binary but uniform.
+	 */
+	
 	public static String[] to_padded_list(String[] binary_list) {
 		int longest = 0;
 		for (int i = 0; i < binary_list.length; i++) {
@@ -1525,7 +1683,8 @@ public class SPAN {
 	 * TODO Moving to Adversary.java
 	 */
 	
-	private static void pretend_adversary() {
+	/*
+	private static void pretend_adversary() { //moved to class
 		String tolist = "MY@NAME@IS@JOSH"; //TODO FIX @ for space
 		char aslist[] = new char[tolist.length()];
 		
@@ -1548,7 +1707,7 @@ public class SPAN {
 			changingRatio += 0.000001;
 			changingDegree += 0.000001;
 			
-			String[] dc = SPAN.decrypt_string("65.2816A136.60081A139.01712A213.64763A38.62887A99.619354A134.64043A162.92131A24.695885A86.92618A110.23209A173.28201A6.391523A66.10949A107.01292A", blocksize, (float) changingRatio, (float) changingDegree);
+			String[] dc = SPAN.decrypt_string("65.2816A136.60081A", blocksize, (float) changingRatio, (float) changingDegree);
 			
 			int t = 0;
 			boolean ok = false;
@@ -1566,9 +1725,19 @@ public class SPAN {
 			System.out.println("SURVIVED " + tries++ + " TIMES.");
 		}
 	}
+	*/
 	
 	/*
 	 * MAIN ENTRY POINT FOR PROGRAM, returns the crypt as a string | return cipherstr , degree as str
+	 */
+	
+	/**
+	 * [External Method] encrypt_bins
+	 * Encrypt a String[] of binary
+	 * @param bins (String[]) The String[] of binary to encrypt.
+	 * @param blocksize (Integer) 8** WILL ADDRESS IN FUTURE VERSION!
+	 * @param TRI_RATIO (Float) The ratio at which to operate at.
+	 * @return (String[]) where return[0] = (String) cipher, and return[1] = (Float) angle.
 	 */
 	
 	public static String[] encrypt_bins(String[] bins, int blocksize, float TRI_RATIO) { //TODO FIXUP CLEANUP
@@ -1576,6 +1745,17 @@ public class SPAN {
 		boolean verified = false;
 		String bigcrypt = "";
 	
+		/*
+		 * TODO ADDRESS BLOCKSIZE FIX IN encrypt_bins
+		 */
+		
+		blocksize = 8;
+		
+		/*
+		 * TODO ADDRESS BLOCKSIZE FIX IN encrypt_bins!
+		 */
+		
+		
 		int stepct = 0;
 		float startangle = (float) 0.0;
 		LinkedList vals = null;
@@ -1634,6 +1814,16 @@ public class SPAN {
 return array of sums
 	 */
 	
+	/**
+	 * [Internal Method] decrypt_string()
+	 * Failsafe decryption of a string that's been ripped from a shuffled cipher.
+	 * @param crypt (String) The cipher.
+	 * @param blocksize (Integer) 8*** WILL ADDRESS IN FUTURE VERSION!
+	 * @param TRI_RATIO (Float) The ratio at which to operate at.
+	 * @param start (Float) The starting degree at which to operate at.
+	 * @return (String[]) A String[] of the decrypted tokens.
+	 */
+	
 	private static String[] decrypt_string(String crypt, int blocksize, float TRI_RATIO, float start) {
 		String ret = "";
 		
@@ -1667,9 +1857,11 @@ return array of sums
 		
 		for (String token : tokens) { //TODO FLOAT-DOUBLE PRECISION STARTING
 			int[] dcm = decrypt_manual(token, TRI_RATIO, next_degree(start, TRI_RATIO, rettokct));
+			/*
 			for (int t : dcm) {
 				//System.out.println("DC T>" + token + " >> " + t);
 			}
+			*/
 			
 			rettok[rettokct++] = String.valueOf(dcm[0]);//TODO FIX
 		}
@@ -1683,8 +1875,11 @@ return array of sums
 		return rettok;
 	}
 	
-	private static void donothinglol() {} /* filler for an if clause */
+	/*
+	private static void donothinglol() {} //ifclause filler
+	*/
 	
+	/*
 	private static boolean forcharequals(String s1, String s2) {
 		
 		int len = 0;
@@ -1704,9 +1899,21 @@ return array of sums
 		
 		return ok;
 	}
+	*/
+	
+	/**
+	 * [External/Internal Method] binary_to_char
+	 * Key player to SPAN, remaps alphabet.
+	 * @param bin (String) The SPAN-generated binary representation of the character.
+	 * @return (Character) The character which it represents with respect to SPAN's internal mapping.
+	 */
 	
 	public static char binary_to_char(String bin) { //THE DIRTY DEUCE! MEAT AND POTATOES!
 	
+		/*
+		 * TODO ADDRESS ALPHABET UNIFICATION IN binary_to_char()
+		 */
+		
 		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,';] [\\1234567890/!@#$%^&*()-+=~`";
 		
 		String[][] bin_array = new String[alphabet.length()][];
@@ -1716,7 +1923,8 @@ return array of sums
 		}
 		
 		//System.out.println("BINARY IN > " + bin);
-		/*
+		
+		/*//MAP 1 DEBUG
 		if (bin.equals("10000000")) return '1';
 		
 		else if (bin.equals("11011000")) return 'l';
@@ -1738,15 +1946,14 @@ return array of sums
 		
 		else if (forcharequals(bin, "10010000")) return 'H'; //10010000
 		
-		
-		
-	
 		else
 			//System.out.println("BINSUM > NaN '" + bin + "'");
 			donothinglol(); //lol
 		*/
+		
 		//HashMap <String, Boolean> check = new HashMap <Integer, Boolean>();
 		
+		//MAP CURRENT
 		if (bin.equals("11010111")) return '0';
 		if (bin.equals("10101001")) return '1';
 		if (bin.equals("10110001")) return '2';
@@ -1793,20 +2000,10 @@ return array of sums
 		if (bin.equals("11101111")) return '/';
 		*/
 		
+		//END MAP CURRENT
 		
-		
-		
-		
-		
-		
-		//final full specials
-		
-		
-		
-		
-		
-		
-		
+
+		//FALL-THROUGH FOR NORMALS
 		
 		int step = 0;
 		for (String[] s2 : bin_array) {
@@ -1817,8 +2014,10 @@ return array of sums
 				//while (bin.length() < s.length()) bin+= "0"; //pad right-most 0
 				
 				//System.out.println("COMPARE <" + s + " <> " + bin + ">");
+				
 				if (binary_to_sum(s) == binary_to_sum(bin)) {
 					
+					/*//DEBUG
 					//special case check for numbers
 					
 					//System.out.println("BINCHAR > " + bin);
@@ -1835,7 +2034,7 @@ return array of sums
 					//binnum 224 = 7
 					//binnum 16 = 8
 					//binnum 144 = 9
-					
+					*/
 					
 					
 					//System.out.println("MATCH!\n\n");
@@ -1853,6 +2052,7 @@ return array of sums
 		
 	}
 	
+	/*
 	private static void justsomedebugstuff() {
 		//loop_until_some_failure_test();
 				//loop_until_some_failure_12bitalign();
@@ -1892,17 +2092,26 @@ return array of sums
 				
 				//pretend_adversary();
 	}
+	*/
 	
 	/*
 	 * get next biggest size with respect to the tokencount passed from sender
 	 */
 	
+	/*
 	private static int getPreambleSizeFor(int tokenct) { //TODO Implementation decision, stay 256 or do dynamic? Static should be better..
 		return 256;
 	}
+	*/
 	
 	private static final int preambleAlphabetOffset = 26;
 	private static final char preambleAlphabetOffsetChar = 'a';
+	
+	/**
+	 * [Internal/External Method]
+	 * Generate a pseudo-random character at instantaneous time t.
+	 * @return (Character) a pseudo-random character.
+	 */
 	
 	public static char generateRandomChar() { 
 		return (char)((new Random()).nextInt(preambleAlphabetOffset) + preambleAlphabetOffsetChar);
@@ -1912,9 +2121,16 @@ return array of sums
 	 * generate random data that we will encrypt and pass back to sender
 	 */
 	
-	//TODO UNIFY ALPHABET REFERENCES IN PROGRAM
+	//TODO UNIFY ALPHABET REFERENCES IN PROGRAM -> isinAlphabet
 	
 	private static final String SPAN_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~`!@#$%^&*()_-+={[}]|\\";
+	
+	/**
+	 * [Internal Method]
+	 * Checks if a character exists in SPAN alphabet.
+	 * @param c (Character) The character which to check.
+	 * @return (Boolean) If the character exists in the SPAN alphabet.
+	 */
 	
 	private static boolean isInAlphabet(char c) {
 		for (int i = 0; i < SPAN_ALPHABET.length(); i++) {
@@ -1922,6 +2138,19 @@ return array of sums
 		}
 		return false;
 	}
+	
+	
+	/*
+	 * TODO BIG IMPLEMENTATION DECISION > ENCRYPT PREAMBLE BEFORE ENCRYPTION?? -> generatePreambleFor(int size)
+	 */
+	
+	/**
+	 * [Internal Method] generatePreambleFor()
+	 * Generate an encrypted preamble for size (size).
+	 * @param size
+	 * @return
+	 */
+	
 	private static String[] generatePreambleFor(int size) {
 		String preambleDataPre = "";
 		char c = '\0';
@@ -1946,9 +2175,17 @@ return array of sums
 	/*
 	 * Takes the crypt tokens and the preamble tokens and carves out a space for it to sit, returns the indices where the actual data sits in the cipher block
 	 returns:
-	 0 - the preamble, data, postamble as str[]
-	 1 - the start int as string
-	 2 - the end int as string
+	 	0 - the preamble, data, postamble as str[]
+	 	1 - the start int as string
+	 	2 - the end int as string
+	 */
+	
+	/**
+	 * [Internal Method] fitToPreamble()
+	 * Fits a cipher inside of a preamble and returns the start and end (pseudo-random pair instantaneously generated)
+	 * @param cryptString (String) The cipher.
+	 * @param preambleBinaryTokens (String[]) The tokens generated from generatePreambleFor()
+	 * @return String[][] where return[0] = (String[]) new_data, return[1] = (Integer) start, return[2] = (Integer) end.
 	 */
 	
 	private static String[][] fitToPreamble(String cryptString, String[] preambleBinaryTokens) {
@@ -2054,11 +2291,20 @@ return array of sums
 		}
 		
 		/*
-		 * JUST TOKENS NO SHUFFLE
+		 * JUST TOKENS NO SHUFFLE - HANDLED
 		 */
 		
 		return new String[][] {new_combined, new String[] {String.valueOf(start)}, new String[] {String.valueOf(end)}}; //~pay the cost to be the boss~ - James Brown
 	}
+	
+	/**
+	 * [Internal Method] getcryptFromBlock()
+	 * Rips the actual cipher from a block given the start and end (assuming the cipher is unshuffled correctly).
+	 * @param cipherblock (String[]) The blocks for the cipher.
+	 * @param start (Integer) The start of the cipher in the block.
+	 * @param end (Integer) The end of the cipher in the block.
+	 * @return (String[]) The cipher blocks alone.
+	 */
 	
 	private static String[] getcryptfromblock(String[] cipherblock, int start, int end) { //TODO FINISH
 		//System.out.println("CRYPTRECOVER START > " + start);
@@ -2091,11 +2337,14 @@ return array of sums
 		return ret;
 	}
 	
-	/**
-	 * @param cipher
-	 * @param replaces
-	 * @return Resequenced cipher
+	/** 
+	 * [Internal Method] shuffleCipherBlock()
+	 * Shuffles a cipher block based on the replacement indices normally generated through generate_replacement_indices_for()
+	 * @param cipher (String[]) The blocks of the cipher.
+	 * @param replaces (Integer[]) The replacement array either manually specified or SPAN-generated. *cipher.size = replaces.size*
+	 * @return (String[]) The resequenced cipher blocks.
 	 */
+	
 	public static String[] shufflecipherblock(String [] cipher, int[] replaces) {
 		String[] reseq = new String[cipher.length];
 		int reseqindex = 0;
@@ -2107,6 +2356,14 @@ return array of sums
 		return reseq;
 	}
 	
+	/**
+	 * [Internal Method] indexForValue()
+	 * Reverse search an integer array's values and return the index it is at. Used for block shuffling.
+	 * @param arr (Integer[]) The array of integers to search.
+	 * @param valforkey (Integer) Search value.
+	 * @return (Integer) index it is located at or 255 if it was not found.
+	 */
+	
 	private static int indexForValue(int[] arr, int valforkey) {
 		int count = 0;
 		for (int i : arr) {
@@ -2116,8 +2373,21 @@ return array of sums
 		
 		if (count >= 255) return 255; //TODO arr length, DEBUG purposes..
 		
+		/*
+		 * TODO ADDRESS OUT-OF-BOUND indexForValue() -> IMPLICATES SHUFFLING
+		 */
+		
 		return count;
 	}
+	
+	/**
+	 * [Internal Method] unshufflecipherblock()
+	 * Unshuffles a cipher block.
+	 * @param cipherblock (String[]) The blocks of the cipher.
+	 * @param replaces (Integer[]) The replacement array either manually specified or SPAN-generated.
+	 * @return (String[]) The unshuffled cipher block. *return.size = cipherblock.size*
+	 */
+	
 	private static String[] unshufflecipherblock(String[] cipherblock, int[] replaces) {
 		/*
 		int[] replaces = generate_replacement_indices_for(ratio, start, end, blocklength); //TODO FIXUP
@@ -2155,6 +2425,15 @@ return array of sums
 		return reseq; //TODO FIX CIPHER SHUFFLE
 	}
 	
+	//TODO DOC cryptstring_to_array()
+	
+	/**
+	 * [Internal Method] cryptstring_to_array()
+	 * Convert a cipher string to an array.
+	 * @param crypt (String) The cipher.
+	 * @return (String[]) The cipher as an array.
+	 */
+	
 	private static String[] cryptstring_to_array(String crypt) {
 		String[] bigcrypt;
 		int ct = 0, last = 0;
@@ -2174,6 +2453,27 @@ return array of sums
 		return bigcrypt;
 		
 	}
+	
+	/*
+	 * TODO generate_replacement_indices_for() uses formula f2. 
+	 */
+	
+	/*
+	 * TODO ORGANIZE FORMULAE
+	 */
+	
+	/*
+	 * TODO ADDRESS F2 ( further complexity ) while preserving it's reversibility.
+	 */
+	
+	/**
+	 * [Internal/External Method] generate_replacement_indices_for()
+	 * @param degree (Float) The degree which to operate at.
+	 * @param ratio (Float) The ratio which to operate at.
+	 * @param start (Integer) Start for that cipher to augment formula.
+	 * @param end (Integer) End for that cipher to augment formula.
+	 * @return (Integer[]) Replacement indexes for this particular degree, ratio, start, end. (F2)
+	 */
 	
 	public static int[] generate_replacement_indices_for(float degree, float ratio, int start, int end) {
 		
@@ -2458,6 +2758,13 @@ return array of sums
 		return full_new_index; //Returns 256 swap indices
 	}
 	
+	/**
+	 * [Internal Method] char_arr_to_str()
+	 * Converts a char[] back to String.
+	 * @param chars (Character[]) The chars to convert to String.
+	 * @return (String) The string as a concatenation of the characters.
+	 */
+	
 	private static String char_arr_to_str(char[] chars) {
 		String ret = "";
 		
@@ -2468,6 +2775,13 @@ return array of sums
 	
 	/*
 	 * Remap input of collisions to different characters from extended ASCII
+	 */
+	
+	/**
+	 * [Internal Method] inputfixup()
+	 * Called to remap input into SPAN to fix collisions.
+	 * @param phrase (String) The phrase to remap characters in.
+	 * @return (String) A safe string to be encrypted in SPAN.
 	 */
 	
 	private static String inputfixup(String phrase) {
@@ -2565,6 +2879,11 @@ return array of sums
 		
 		return phrase;
 	}
+	
+	/**
+	 * [Internal/External TEST] repl()
+	 * Used for testing some parts of the program easily.
+	 */
 	
 	public static void repl() {
 		boolean run = true;
@@ -3068,7 +3387,15 @@ return array of sums
 	
 	/* run internal when public */
 	
-	public static void testa() {
+	/*
+	 * TODO CLEANUP TESTING METHODS
+	 */
+	
+	/**
+	 * DEBUG-PURPOSE TESTING
+	 */
+	 
+	private static void testa() {
 		//repl();
 		//generate_replacement_indices_for((float) 0.8, 28, 56, 256);
 		
@@ -3174,7 +3501,12 @@ return array of sums
 		//use while loop to populate new array of indexes from function
 	}
 	
-	public static void test_shuffle() {
+	/**
+	 * [Internal Method] test_shuffle()
+	 * Test SPANs internal shuffling.
+	 */
+	
+	private static void test_shuffle() {
 		int[] replace = generate_replacement_indices_for((float) 20.846723, (float) 0.888, 118, 200);
 		//System.out.println("INDICE ARRAY >");
 		for (int i : replace) {
@@ -3210,9 +3542,14 @@ return array of sums
 		System.out.println("DECRYPT > '" + dc + "'");
 	}
 	
-	public static void no() {
+	/**
+	 * [Internal Method] testx()
+	 * DEBUG ONLY
+	 */
+	
+	public static void textx() {
 		
-		String[][] shuffle = encrypt_shuffled("HELLO", 0.888f, 8, false);
+		String[][] shuffle = encrypt_shuffled("HELLO", 0.888f, false);
 		
 		for (String s : shuffle[0]) {
 			System.out.println(s);
@@ -3242,6 +3579,11 @@ return array of sums
 		SPAN.decrypt_shuffled(test_str, shuffle[1][0]);
 	}
 	
+	/**
+	 * [Internal/External Method] blockPhrase
+	 * @param phrase (String) The phrase to be converted to (String[])
+	 * @return (String[]) The phrase as a String[]
+	 */
 	public static String[] blockPhrase(String phrase) {
 		String[] ret;
 		ret = phrase.split("A"); //TODO CHECK LABELS
@@ -3254,12 +3596,16 @@ return array of sums
 		
 	}
 	
+	/**
+	 * [Internal Method] testshufflealt()
+	 * DEBUG PURPOSES ONLY
+	 */
 	private static void testshufflealt() {
 		//test_shuffle();
 
 		String phrase = "HELLO";
 		
-		String[][] encrypt = encrypt_shuffled(phrase, 0.888f, 8, false);
+		String[][] encrypt = encrypt_shuffled(phrase, 0.888f, false);
 	
 		String shuff = "";
 		for (String s : encrypt[0]) shuff += s;
@@ -3278,6 +3624,11 @@ return array of sums
 		System.exit(0);
 	}
 	
+	/**
+	 * [Internal Method] countUnique()
+	 * Count unique generations / bad generations / collisions generated from a single phrase with one ratio.
+	 * @param phrase (String) The phrase to test.
+	 */
 	private static void countUnique(String phrase) {
 		int uniques = 0;
 		HashMap<String, String> unique= new HashMap <String, String>();
@@ -3296,7 +3647,7 @@ return array of sums
 		while (true) {
 			try {
 				//test_shuffle();
-				encrypt = encrypt_shuffled(phrase, 0.888f, 8, false);
+				encrypt = encrypt_shuffled(phrase, 0.888f, false);
 			
 				String shuff = "";
 				for (String s : encrypt[0]) shuff += s;
