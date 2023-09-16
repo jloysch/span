@@ -155,7 +155,14 @@ public class SPAN {
 		return next;
 	}
 	
-	public static String decrypt_shuffled(String[] cipherblocks, String key) {
+	public static String decrypt_shuffled(String phrase, String key) {
+		
+		
+		String[] cipherblock = phrase.split("A"); //TODO CHECK LABELS
+		for (int i = 0; i < cipherblock.length; i++) cipherblock[i] = cipherblock[i] + 'A';
+		
+		//TODO CHECK RECOMBINATION
+		
 		key = key.substring(2, key.length()-2);
 		String[] keytoks = new String[4];
 		int keyct = 0;
@@ -190,7 +197,7 @@ public class SPAN {
 		
 		//String[] test = SPAN.encrypt("HELLO", (float) 0.888, 8, false);
 		
-		String[] ciphertokens = cipherblocks; //TODO CHECK BLOCK LABELS
+		//String[] ciphertokens = cipherblocks; //TODO CHECK BLOCK LABELS
 			
 		//String[] shuffle = shufflecipherblock(ciphertokens, replace);
 		/*
@@ -203,7 +210,10 @@ public class SPAN {
 		}
 		*/
 		
-		String[] unshuffle = unshufflecipherblock(cipherblocks, replace); //TODO Externalize to derive func just testing
+		String[] ciphertokens = phrase.split("A"); //TODO CHECK LABELS
+		for (int i = 0; i < ciphertokens.length; i++) ciphertokens[i] = ciphertokens[i] + 'A';
+		
+		String[] unshuffle = unshufflecipherblock(ciphertokens, replace); //TODO Externalize to derive func just testing
 		
 		String test_str = "";
 		for (String s : unshuffle) {
@@ -297,79 +307,101 @@ public class SPAN {
 	 * @return encrypt[0] blocks, encrypt[1][0] key
 	 */
 	public static String[][] encrypt_shuffled(String phrase, float ratio, int blocksize, boolean writetofile) {
+		boolean ok = false;
 		
-		String[] encrypt = encrypt(phrase, ratio, blocksize, writetofile);
-		
-		
-		//System.out.println("INDICE ARRAY >");
-		
-		
-		String key = encrypt[1];
-		key = key.substring(2, key.length()-2);
-		String[] keytoks = new String[4]; //reformat key to get vals
-		int keyct = 0;
-		int last = 0;
-		//System.out.println("KEY + '" + key + "'");
-		
-		for (int i = 0; i < key.length(); i++) {
-			if (Character.isLetter(key.charAt(i))) {
-				keytoks[keyct++] = key.substring(last, i);
-				last = i + 1;
+		while (!ok) { //TODO Code cleanup
+			
+			try {
+				String[] encrypt = encrypt(phrase, ratio, blocksize, writetofile);
+				
+				
+				//System.out.println("INDICE ARRAY >");
+				
+				
+				String key = encrypt[1];
+				key = key.substring(2, key.length()-2);
+				String[] keytoks = new String[4]; //reformat key to get vals
+				int keyct = 0;
+				int last = 0;
+				//System.out.println("KEY + '" + key + "'");
+				
+				for (int i = 0; i < key.length(); i++) {
+					if (Character.isLetter(key.charAt(i))) {
+						keytoks[keyct++] = key.substring(last, i);
+						last = i + 1;
+					}
+					
+				}
+				
+				/*
+				for (String s : keytoks) {
+					System.out.println("KEYTOK > " + s);
+				}
+				*/
+				float degree = Float.parseFloat(keytoks[0]);
+				//float ratio = Float.parseFloat(keytoks[1]);
+				int start = Integer.parseInt(keytoks[2]), end = Integer.parseInt(keytoks[3]);
+				
+				//System.out.println("KEY > " + key);
+				
+				int[] replace = generate_replacement_indices_for(degree, ratio, start, end);
+				
+				//System.out.println("ENCRYPT GOT REPLACEMENTS");
+				
+				String[] ciphertokens = encrypt[0].split("A"); //TODO CHECK BLOCK LABELS
+					
+				String[] shuffle = shufflecipherblock(ciphertokens, replace);
+				
+				/*
+				for (String s : shuffle) {
+					System.out.println("SHUFFLE > " + s);
+				}
+				
+				for (int r : replace) {
+					System.out.println("REPLACE " + r);
+				}
+				
+				String[] unshuffle = unshufflecipherblock(shuffle, replace); //TODO Externalize to derive func just testing
+				
+				String test_str = "";
+				for (String s : unshuffle) {
+					System.out.println("UNSHUFFLE > " + s);
+					test_str += s;
+				}
+				
+				//test decrypt moment of truth
+				
+				
+				String dc = SPAN.decrypt(test_str, test[1]);
+				
+				System.out.println("DECRYPT > '" + dc + "'");
+				*/
+				
+				/*
+				for (String s : shuffle) {
+					System.out.println("ENCSHUFFLE > " + s);
+				}
+				*/
+				
+				//verify before return
+				
+				//for (String s : ciphertokens) System.out.println(s);
+				//for (int i = 0; i < ciphertokens.length; i++) ciphertokens[i] = ciphertokens[i] + 'A'; //TODO CHECK BLOCK LABELS
+				String shuff = "";
+				for (String s : shuffle) shuff += s;
+				
+				String decrypt = SPAN.decrypt_shuffled(shuff, encrypt[1]);
+				
+				if (decrypt.equals(phrase)) {
+					ok = true;
+					return new String[][] {shuffle, new String[] {encrypt[1]}};
+				} 
+				
+			} catch (Exception e) {
+				//do nothing, ignore
 			}
-			
 		}
-		
-		/*
-		for (String s : keytoks) {
-			System.out.println("KEYTOK > " + s);
-		}
-		*/
-		float degree = Float.parseFloat(keytoks[0]);
-		//float ratio = Float.parseFloat(keytoks[1]);
-		int start = Integer.parseInt(keytoks[2]), end = Integer.parseInt(keytoks[3]);
-		
-		//System.out.println("KEY > " + key);
-		
-		int[] replace = generate_replacement_indices_for(degree, ratio, start, end);
-		
-		//System.out.println("ENCRYPT GOT REPLACEMENTS");
-		
-		String[] ciphertokens = encrypt[0].split("A"); //TODO CHECK BLOCK LABELS
-			
-		String[] shuffle = shufflecipherblock(ciphertokens, replace);
-		
-		/*
-		for (String s : shuffle) {
-			System.out.println("SHUFFLE > " + s);
-		}
-		
-		for (int r : replace) {
-			System.out.println("REPLACE " + r);
-		}
-		
-		String[] unshuffle = unshufflecipherblock(shuffle, replace); //TODO Externalize to derive func just testing
-		
-		String test_str = "";
-		for (String s : unshuffle) {
-			System.out.println("UNSHUFFLE > " + s);
-			test_str += s;
-		}
-		
-		//test decrypt moment of truth
-		
-		
-		String dc = SPAN.decrypt(test_str, test[1]);
-		
-		System.out.println("DECRYPT > '" + dc + "'");
-		*/
-		
-		/*
-		for (String s : shuffle) {
-			System.out.println("ENCSHUFFLE > " + s);
-		}
-		*/
-		
-		return new String[][] {shuffle, new String[] {encrypt[1]}};
+		return null;
 	}
 	
 	//PUBLIC ACCESSIBLE METHOD
@@ -3207,7 +3239,7 @@ return array of sums
 		
 		System.out.println("DECRYPT > '" + dc + "'");
 		
-		SPAN.decrypt_shuffled(unshuffle, shuffle[1][0]);
+		SPAN.decrypt_shuffled(test_str, shuffle[1][0]);
 	}
 	
 	public static String[] blockPhrase(String phrase) {
@@ -3229,10 +3261,11 @@ return array of sums
 		
 		String[][] encrypt = encrypt_shuffled(phrase, 0.888f, 8, false);
 	
-		
+		String shuff = "";
+		for (String s : encrypt[0]) shuff += s;
 		
 		System.out.println("TRYING DECRYPT");
-		String decrypt = SPAN.decrypt_shuffled(encrypt[0], encrypt[1][0]);
+		String decrypt = SPAN.decrypt_shuffled(shuff, encrypt[1][0]);
 		
 		System.out.println("DECRYPT DC > '" + decrypt + "'");
 		System.out.println("KEY > '" + encrypt[1][0] + "'");
@@ -3265,10 +3298,12 @@ return array of sums
 				//test_shuffle();
 				encrypt = encrypt_shuffled(phrase, 0.888f, 8, false);
 			
+				String shuff = "";
+				for (String s : encrypt[0]) shuff += s;
 				
 				
 				//System.out.println("TRYING DECRYPT");
-				decrypt = SPAN.decrypt_shuffled(encrypt[0], encrypt[1][0]);
+				decrypt = SPAN.decrypt_shuffled(shuff, encrypt[1][0]);
 				
 				comp = "";
 				
