@@ -1,4 +1,5 @@
 Introducing SPAN: Toy Encryption Algorithm - Joshua Loysch. 256 Block Sea of Encrypted Data 
+----------------------------
 
 A MESSAGE FROM ME, TO YOU, IN SPAN! >>
 
@@ -51,6 +52,8 @@ At a rate of 2^32 calculations/s for bruteforce it would take about 4.25yrs to g
 then they would receive a phrase that they believe to br whatever it is they're looking for. This may or may not be the case. The attacker would need to keep track of every generated possibility and run it against some dictionary to generate the most likely keys. This would take an uncalculated amount of time, including permutations and an unknown length as well as other factors. A user will have changed their password by then.
 
 SPAN's intent is to encrypt data quickly and safely while not being too costly. If you store some secret in there such as a password, and the attacker manages to get your cipher and not the key, then that could actually be useless; what they're left with is possible passwords you could've used that is as good as their likely keys they've generated. SPAN would allow data to be intercepted and still be safe since the attacker can't prove for sure what was encrypted with SPAN unless they plug that secret data into whatever resource they're trying to access.
+
+-------------------------
 
 DEBUG OUTPUT 9/16/2023
 
