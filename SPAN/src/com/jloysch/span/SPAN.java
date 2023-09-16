@@ -155,6 +155,78 @@ public class SPAN {
 		return next;
 	}
 	
+	public static String decrypt_shuffled(String[] cipherblocks, String key) {
+		key = key.substring(2, key.length()-2);
+		String[] keytoks = new String[4];
+		int keyct = 0;
+		int last = 0;
+		//System.out.println("KEY + '" + key + "'");
+		
+		for (int i = 0; i < key.length(); i++) {
+			if (Character.isLetter(key.charAt(i))) {
+				keytoks[keyct++] = key.substring(last, i);
+				last = i + 1;
+			}
+			
+		}
+		
+	
+		
+		/*
+		for (String s : keytoks) {
+			System.out.println("KEYTOK > " + s);
+		}
+		*/
+		
+		float degree = Float.parseFloat(keytoks[0]);
+		float ratio = Float.parseFloat(keytoks[1]);
+		int start = Integer.parseInt(keytoks[2]), end = Integer.parseInt(keytoks[3]);
+		
+		int[] replace = generate_replacement_indices_for(degree, ratio, start, end);
+		//System.out.println("INDICE ARRAY >");
+		for (int i : replace) {
+			//System.out.println(i);
+		}
+		
+		//String[] test = SPAN.encrypt("HELLO", (float) 0.888, 8, false);
+		
+		String[] ciphertokens = cipherblocks; //TODO CHECK BLOCK LABELS
+			
+		//String[] shuffle = shufflecipherblock(ciphertokens, replace);
+		/*
+		for (String s : shuffle) {
+			System.out.println("SHUFFLE > " + s);
+		}
+		
+		for (int r : replace) {
+			System.out.println("REPLACE " + r);
+		}
+		*/
+		
+		String[] unshuffle = unshufflecipherblock(cipherblocks, replace); //TODO Externalize to derive func just testing
+		
+		String test_str = "";
+		for (String s : unshuffle) {
+			//System.out.println("UNSHUFFLE > " + s);
+			test_str += s;
+		}
+		
+		//test decrypt moment of truth
+		
+		/*
+		 * TODO ADD PRE POSTFIX BACK
+		 */
+		
+		key = "//" + key + "\\\\"; //TODO CHECK
+		//System.out.println("KEY DC'" + key + "'");
+		//System.out.println("TESTSTR > " + test_str);
+		String dc = decrypt(test_str, key);
+		//String dc = null;
+		//System.out.println("DECRYPT > '" + dc + "'");
+		
+		return dc;
+	}
+	
 	private static int[] decrypt(String[] crypt_tokens, float R, float degree_obsf) {
 		
 		int dec_tokens[] = new int[crypt_tokens.length];
@@ -213,6 +285,91 @@ public class SPAN {
 		}
 		
 		return gen;
+	}
+	
+	
+	/**
+	 * 
+	 * @param phrase
+	 * @param ratio
+	 * @param blocksize
+	 * @param writetofile
+	 * @return encrypt[0] blocks, encrypt[1][0] key
+	 */
+	public static String[][] encrypt_shuffled(String phrase, float ratio, int blocksize, boolean writetofile) {
+		
+		String[] encrypt = encrypt(phrase, ratio, blocksize, writetofile);
+		
+		
+		//System.out.println("INDICE ARRAY >");
+		
+		
+		String key = encrypt[1];
+		key = key.substring(2, key.length()-2);
+		String[] keytoks = new String[4]; //reformat key to get vals
+		int keyct = 0;
+		int last = 0;
+		//System.out.println("KEY + '" + key + "'");
+		
+		for (int i = 0; i < key.length(); i++) {
+			if (Character.isLetter(key.charAt(i))) {
+				keytoks[keyct++] = key.substring(last, i);
+				last = i + 1;
+			}
+			
+		}
+		
+		/*
+		for (String s : keytoks) {
+			System.out.println("KEYTOK > " + s);
+		}
+		*/
+		float degree = Float.parseFloat(keytoks[0]);
+		//float ratio = Float.parseFloat(keytoks[1]);
+		int start = Integer.parseInt(keytoks[2]), end = Integer.parseInt(keytoks[3]);
+		
+		//System.out.println("KEY > " + key);
+		
+		int[] replace = generate_replacement_indices_for(degree, ratio, start, end);
+		
+		//System.out.println("ENCRYPT GOT REPLACEMENTS");
+		
+		String[] ciphertokens = encrypt[0].split("A"); //TODO CHECK BLOCK LABELS
+			
+		String[] shuffle = shufflecipherblock(ciphertokens, replace);
+		
+		/*
+		for (String s : shuffle) {
+			System.out.println("SHUFFLE > " + s);
+		}
+		
+		for (int r : replace) {
+			System.out.println("REPLACE " + r);
+		}
+		
+		String[] unshuffle = unshufflecipherblock(shuffle, replace); //TODO Externalize to derive func just testing
+		
+		String test_str = "";
+		for (String s : unshuffle) {
+			System.out.println("UNSHUFFLE > " + s);
+			test_str += s;
+		}
+		
+		//test decrypt moment of truth
+		
+		
+		String dc = SPAN.decrypt(test_str, test[1]);
+		
+		System.out.println("DECRYPT > '" + dc + "'");
+		*/
+		
+		/*
+		for (String s : shuffle) {
+			System.out.println("ENCSHUFFLE > " + s);
+		}
+		*/
+		
+		return new String[][] {shuffle, new String[] {encrypt[1]}};
 	}
 	
 	//PUBLIC ACCESSIBLE METHOD
@@ -488,6 +645,7 @@ public class SPAN {
 		System.out.println("Cryptfromblockend = " + tokens[1]);
 		*/
 		
+		System.out.println("CIPHER > " + cipher);
 		String[] cipherasarray = cryptstring_to_array(cipher);
 		
 		
@@ -496,9 +654,12 @@ public class SPAN {
 		
 		for (int i = 0; i < cipherasarray.length; i++) {
 			
+			
 			if (!((cipherasarray[i].charAt( cipherasarray[i].length()-1) == blockdenoter))) {
 				cipherasarray[i] = cipherasarray[i] + blockdenoter;
 			}
+			
+			//System.out.println("CIPHERKEYAT " + i + " >> " + cipherasarray[i]);
 		}
 		
 		/*
@@ -1743,7 +1904,7 @@ return array of sums
 			
 			preambleDataPre += c;
 			
-			System.out.println("CHOOSE > " + c);
+			//System.out.println("PREAMBLE CHOOSE > " + c);
 			
 			okaychar = false;
 		}
@@ -1898,7 +2059,34 @@ return array of sums
 		return ret;
 	}
 	
-	private static String[] unshufflecipherblock(String cipherblock, float ratio, int start, int end, int blocklength) {
+	/**
+	 * @param cipher
+	 * @param replaces
+	 * @return Resequenced cipher
+	 */
+	public static String[] shufflecipherblock(String [] cipher, int[] replaces) {
+		String[] reseq = new String[cipher.length];
+		int reseqindex = 0;
+		String temporary;
+		for (int i = 0; i < reseq.length; i++) {
+			reseq[reseqindex++] = cipher[replaces[i]] + 'A';
+		}
+		
+		return reseq;
+	}
+	
+	private static int indexForValue(int[] arr, int valforkey) {
+		int count = 0;
+		for (int i : arr) {
+			if (i == valforkey) return count;
+			count++;
+		}
+		
+		if (count >= 255) return 255;
+		
+		return count;
+	}
+	private static String[] unshufflecipherblock(String[] cipherblock, int[] replaces) {
 		/*
 		int[] replaces = generate_replacement_indices_for(ratio, start, end, blocklength); //TODO FIXUP
 		
@@ -1920,7 +2108,19 @@ return array of sums
 		
 		for (int i : replaces) System.out.println("REPLACE > " + i);
 		*/
-		return cryptstring_to_array(cipherblock); //TODO FIX CIPHER SHUFFLE
+		
+		String[] reseq = new String[cipherblock.length];
+		int reseqindex = 0;
+		
+		//int t = 0;
+		
+		for (int i = 0; i < reseq.length; i++) {
+			//t = (cipherblock[(replaces[i])]);
+			//reseq[i] = cipherblock[replaces[i]];
+			reseq[i] = cipherblock[indexForValue(replaces,i)];
+		}
+		
+		return reseq; //TODO FIX CIPHER SHUFFLE
 	}
 	
 	private static String[] cryptstring_to_array(String crypt) {
@@ -1943,11 +2143,16 @@ return array of sums
 		
 	}
 	
-	private static int[] generate_replacement_indices_for(float ratio, int start, int end, int cipherblocklength) {
+	public static int[] generate_replacement_indices_for(float degree, float ratio, int start, int end) {
+		
+		//int cipherblocklength = 64; //TODO ADDRESS IN PROGRAM, THIS IS TO LIMIT IT TO GENERATE 64 POINTS
+		
+		/*
 		int[] finalindices = new int[cipherblocklength];
 		int[] toswap = new int[cipherblocklength];
 		int[] freenums = new int[cipherblocklength];
 		float[] progressiveDegrees = new float[cipherblocklength];
+		
 		
 		for (int i = 0; i < cipherblocklength; i++) {
 			freenums[i] = i;
@@ -2002,9 +2207,222 @@ return array of sums
 		
 		System.out.println("CHECKSTR FOR replace >> " + checkstrtemp);
 		
+		*/
+		
+	
+		int POINTS = 64;
+		
+		int[] new_block_indices = new int [POINTS];
+		float[] progressiveDegrees = new float[POINTS];
+		float moddegree = 0.0f;
+		float[] ratiosteparray = new float[POINTS];
+		int ratiosadded = 0;
+		
+		HashMap <Integer, Boolean> used = new HashMap <Integer, Boolean>();
+		
+		boolean populated = false;
+		
+		for (int i = 0; i < POINTS; i++) {
+			moddegree = (float) (degree*(start+end+ratio) + Math.pow(i, ratio)); //step across multiple bands
+			
+			for (int j = i; j < POINTS; j++) { //generate 256 degrees
+				progressiveDegrees[j] = next_degree(ratio, moddegree, j); //prog degree changes each time
+			}
+			
+			for (int d = 0; d < POINTS; d++) {
+				
+				if (used.get(Math.round(progressiveDegrees[d])) == null) {
+					
+					used.put(Math.round(progressiveDegrees[d]), true);
+					
+					new_block_indices[i] = Math.round(progressiveDegrees[d]);
+					
+					//if (ratiosadded + 1 == POINTS) ratiosadded--;
+					if (ratiosadded < 64) ratiosteparray[ratiosadded++] = ratio*progressiveDegrees[d];
+					//TODO ADDRESS ISSUE ^^^^ WHERE WE GENERATE > 64?!
+					populated = true;
+					break; //fallthrough
+				}
+				
+			}
+			
+			
+			
+			/*
+			 * Check if populated
+			 * 
+			 */
+			
+			int ratioretries = 0;
+			
+			float altratio = ratio/7;
+			
+			int retries = 0;
+		
+			if (new_block_indices[i] == 0) populated = false;
+			
+			while (!populated) {
+				
+				
+				if (new_block_indices[i] == 0) {
+					//System.out.println("NO INDICE FOR " + i + "!");
+					
+					//moddegree += 4.321;
+					
+					moddegree += (1/(end-start+altratio)/ratio);
+					
+				
+					//moddegree %= end/start;
+					//altratio += 1.234;
+					
+					altratio += ((end-start + altratio)/Math.pow(i, ratio));
+					
+					if (ratioretries > 256) {
+						moddegree += i*((end*start+altratio))%(ratio+((start*end+0.1)));
+						altratio += i*((end*start+altratio))%(ratio+((start*end+0.1)));
+						
+					}  else if (ratioretries >= 512) {
+						
+						moddegree *= Math.pow(1, altratio*1*start*.999f);
+						altratio *= Math.pow(1, moddegree*1*start*.999f);
+						
+						ratioretries = 0;
+					}
+					
+					if (moddegree > 45) moddegree %= 45f;
+					if (altratio > .999) altratio %= .999f;
+					
+					//System.out.println("DEGREE > " + moddegree);
+					//System.out.println("RATIO > " + altratio);
+					
+					//populated = true;
+					
+					for (int j = i; j < POINTS; j++) { //generate 256 degrees
+						progressiveDegrees[j] = next_degree(altratio, moddegree, j); //prog degree changes each time
+					}
+					
+					for (int d = 0; d < progressiveDegrees.length; d++) {
+						
+						if (used.get(Math.round(progressiveDegrees[d])) == null) {
+							
+							used.put(Math.round(progressiveDegrees[d]), true);
+							
+							new_block_indices[i] = (Math.round(progressiveDegrees[d]));
+							if (ratiosadded < ratiosteparray.length) {
+								ratiosteparray[ratiosadded++] = altratio;
+							} else {
+								break;
+							}
+							//System.out.println("FIXED " + i);
+							populated = true;
+							break; //fallthrough
+							 
+						}
+						
+					}
+					
+					//if (i == 129) populated = true;
+				}
+				
+				ratioretries++;
+				retries++;
+				
+				//if (i == 129) populated = true; //TODO ADDRESS THIS, CAN GENERATE UP TO 154 SWAPS WHICH IS MORE THAN HALF A BLOCK
+			
+				if (ratiosadded == 64) populated = true; //n > 64 access when not limiting..??
+			} //TODO CHECK LOGIC FOR ARRAY INDEXES
+			
+		
+			
+		}
+		
+		int nblckct = 0;
+		
+		for (int i : new_block_indices) {
+			if (i != 0) nblckct++;
+		}
+		
+		int[] condense = new int[nblckct];
+		nblckct = 0;
+		for (int i = 0; i < POINTS; i++) {
+			if (new_block_indices[i] != 0) {
+				condense[nblckct++] = indexForValue(new_block_indices, i);
+			}
+		}
 		
 		
-		return toswap;
+		/*	
+		LinkedList ll = new LinkedList();
+		
+		ll.add(condense);
+		ll.add(ratiosteparray);
+		*/
+		
+		int bigint = 0;
+		
+		for (int i : condense) {
+			
+			bigint += i*i; //make BIG int
+			//bigint++;
+			
+		}
+		//System.out.print("]\n");
+		
+		//System.out.print("[");
+		
+		float bigfloat = 0f;
+		for (float f : ratiosteparray) {
+			//System.out.print(f + " ");
+			bigfloat += f;
+		}
+		
+		//System.out.print("]\n");
+		
+		//System.out.println("\nFUNC > " + bigint + "/" + bigfloat + "X");
+	
+		float derivedfunc = bigint * 1f / bigfloat;
+		
+		
+		int[] full_new_index = new int[256];
+		int newindex = 0;
+		int remaptries = 0;
+		boolean full = false;
+		
+		//newratio is sum of all ratios back from indices in span
+		//func from span
+		HashMap<Integer, Integer> placements = new HashMap<Integer, Integer>();
+		
+		
+		//derivedfunc = 99.089f;
+		while (!full) {
+			for (int i = 0; i < full_new_index.length; i++) {
+				newindex = ((int) (i* 1f * derivedfunc));
+				
+				if (placements.get(i) == null) {
+					
+					if (newindex < 255) {
+						placements.put(i, newindex);
+					} else {
+						newindex = newindex % 255 + remaptries;
+						placements.put(i, newindex);
+					}
+				}
+			}
+			
+			if (placements.size() == 256) full = true;
+			
+			remaptries++;
+		}
+		
+		for (int i = 0; i < 256; i++) {
+			//System.out.println(placements.get(i));
+			full_new_index[i] = placements.get(i);
+		}
+		
+		System.out.println("FUNC = " + derivedfunc + "X...");
+		//use while loop to populate new array of indexes from function
+		
+		return full_new_index; //Returns 256 swap indices
 	}
 	
 	private static String char_arr_to_str(char[] chars) {
@@ -2617,11 +3035,213 @@ return array of sums
 	
 	/* run internal when public */
 	
-	private static void main(String args[]) {
-		repl();
+	public static void testa() {
+		//repl();
 		//generate_replacement_indices_for((float) 0.8, 28, 56, 256);
 		
 		//generatePreambleFor(256);
+		
+		int[] replace = generate_replacement_indices_for((float) 20.846724, (float) 0.888, 118, 200);
+		
+		//0 is replacements array int[]
+		//1 is ratio steps array for func
+		
+	
+		/*
+		for (int i = 0; i < ((int[]) replace.get(0)).length; i++) {
+			System.out.println("Replace index " + i + " with index " + ((int[]) replace.get(0))[i]);
+		}
+		*/
+		int bigint = 0;
+		System.out.print("[");
+		for (int i : replace) {
+			System.out.print(i + " ");
+			bigint += i*i; //make big int
+			
+		}
+		System.out.print("]\n");
+		
+		System.out.print("[");
+		
+		/*
+		float bigfloat = 0f;
+		for (float f : (float[]) replace.get(1)) {
+			System.out.print(f + " ");
+			bigfloat += f;
+		}
+		*/
+		
+		System.out.print("]\n");
+		
+		//System.out.println("\nFUNC > " + bigint + "/" + bigfloat + "X");
+	
+		//float derivedfunc = bigint * 1f / bigfloat;
+		
+		System.out.print("\n\n[");
+		
+		/*
+		 * Generate the
+		 */
+		
+		/*
+		int newindex = 0;
+		for (int i = 0; i < 256; i++) {
+			newindex = ((int) (i* 1f * newratio));
+			
+			
+			if (newindex > 255) {
+				newindex = newindex%255 + 1;
+			}
+			
+			System.out.print(newindex + " ");
+		}
+		System.out.print("]\n\n");
+		*/
+		
+		//making a loop
+		
+		int[] full_new_index = new int[256];
+		int newindex = 0;
+		int remaptries = 0;
+		boolean full = false;
+		
+		//newratio is sum of all ratios back from indices in span
+		//func from span
+		HashMap<Integer, Integer> placements = new HashMap<Integer, Integer>();
+		
+		//derivedfunc = 99.089f;
+		
+		/*
+		while (!full) {
+			for (int i = 0; i < full_new_index.length; i++) {
+				newindex = ((int) (i* 1f * derivedfunc));
+				
+				if (placements.get(i) == null) {
+					
+					if (newindex < 255) {
+						placements.put(i, newindex);
+					} else {
+						newindex = newindex % 255 + remaptries;
+						placements.put(i, newindex);
+					}
+				}
+			}
+			
+			if (placements.size() == 256) full = true;
+			
+			remaptries++;
+		}
+		
+		for (int i = 0; i < 256; i++) {
+			System.out.println(placements.get(i));
+		}
+		*/
+		
+		//System.out.println("FUNC = " + derivedfunc + "X...");
+		//use while loop to populate new array of indexes from function
+	}
+	
+	public static void test_shuffle() {
+		int[] replace = generate_replacement_indices_for((float) 20.846723, (float) 0.888, 118, 200);
+		//System.out.println("INDICE ARRAY >");
+		for (int i : replace) {
+			//System.out.println(i);
+		}
+		
+		String[] test = SPAN.encrypt("HELLO", (float) 0.888, 8, false);
+		
+		String[] ciphertokens = test[0].split("A"); //TODO CHECK BLOCK LABELS
+			
+		String[] shuffle = shufflecipherblock(ciphertokens, replace);
+		
+		for (String s : shuffle) {
+			System.out.println("SHUFFLE > " + s);
+		}
+		
+		for (int r : replace) {
+			System.out.println("REPLACE " + r);
+		}
+		String[] unshuffle = unshufflecipherblock(shuffle, replace); //TODO Externalize to derive func just testing
+		
+		String test_str = "";
+		for (String s : unshuffle) {
+			System.out.println("UNSHUFFLE > " + s);
+			test_str += s;
+		}
+		
+		//test decrypt moment of truth
+		
+		
+		String dc = SPAN.decrypt(test_str, test[1]);
+		
+		System.out.println("DECRYPT > '" + dc + "'");
+	}
+	
+	public static void no() {
+		
+		String[][] shuffle = encrypt_shuffled("HELLO", 0.888f, 8, false);
+		
+		for (String s : shuffle[0]) {
+			System.out.println(s);
+		}
+		
+	
+		System.out.println(shuffle[1][0]); //Print key
+		
+		
+		String[] unshuffle = unshufflecipherblock(shuffle[0], 
+				(generate_replacement_indices_for((float) 20.846723, (float) 0.888, 118, 200)) 
+				); //TODO Externalize to derive func just testing
+		
+		String test_str = "";
+		for (String s : unshuffle) {
+			//System.out.println("UNSHUFFLE > " + s);
+			test_str += s;
+		}
+		
+		//test decrypt moment of truth
+		
+		
+		String dc = SPAN.decrypt(test_str, shuffle[1][0]);
+		
+		System.out.println("DECRYPT > '" + dc + "'");
+		
+		SPAN.decrypt_shuffled(unshuffle, shuffle[1][0]);
+	}
+	
+	public static String[] blockPhrase(String phrase) {
+		String[] ret;
+		ret = phrase.split("A"); //TODO CHECK LABELS
+		
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = ret[i] + 'A';
+		}
+		
+		return ret;
+		
+	}
+	public static void main(String args[]) {
+		//test_shuffle();
+		
+		String phrase = "HELLO";
+		
+		String[][] encrypt = encrypt_shuffled(phrase, 0.888f, 8, false);
+	
+		
+		
+		System.out.println("TRYING DECRYPT");
+		String decrypt = SPAN.decrypt_shuffled(encrypt[0], encrypt[1][0]);
+		
+		System.out.println("DECRYPT DC > '" + decrypt + "'");
+		System.out.println("KEY > '" + encrypt[1][0] + "'");
+		if (decrypt.equals(phrase)) {
+			System.out.println("VERIFIED!");
+		} else {
+			System.out.println("MISMATCH!");
+		}
+		
+		System.exit(0);
+		
 	}
 
 }
