@@ -3,6 +3,13 @@ package com.jloysch.span;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Adversary {
 	
@@ -14,7 +21,9 @@ public class Adversary {
 		return (BRUTEFORCE_SIM_STR.equals(phrase));
 	}
 	
-	public static void bruteforceSim(String intended_phrase) {
+	static int bad_crypt_timeout = 1;
+	
+	public static String[] bruteforceSim(String intended_phrase) {
 		boolean cracked = false;
 		
 		String phrase = intended_phrase;
@@ -70,28 +79,30 @@ public class Adversary {
 			
 			}
 			
+			/*
 			for (Float f : crypttokens) {
 				System.out.println("TOKEN > " + f);
 			}
+			*/
 			//System.exit(0);
 			String recomp = "";
 			for (String s : pair[0]) recomp += s; //TODO CHECK BLOCK LABELS
 			
 			
 			
-			final boolean helpkey = true; //IF HELP KEY IS TURNED OFF THE PROGRAM FREEZES, SOME BAD KEYS WILL CAUSE THE PROGRAM TO FREEZE!
+			final boolean helpkey = false; //IF HELP KEY IS TURNED OFF THE PROGRAM FREEZES, SOME BAD KEYS WILL CAUSE THE PROGRAM TO FREEZE!
 			
 			float helpdoffset = 0f;
 			float helproffset = 0.001f;
 			
-			
+			boolean dcnull = false;
 			LinkedList<String> keys = new LinkedList<String>();
 			//originalcipherkey += "\\";
 			for (int blocksize = 8; blocksize < 12; blocksize++) {
 				
-				for (float degree = helpkey ? 0f : 1f ; degree < 99.999999f; degree+=0.000001f) {
+				for (float degree = helpkey ? 0f : 0.f ; degree < 99.999999f; degree+=0.000001f) {
 				
-					for (float ratio = helpkey ? 0f : .1f ; ratio < 1.0f; ratio+=0.000001f) {
+					for (float ratio = helpkey ? 0f : .1f ; ratio < 1.0f; ratio+=0.001f) {
 				
 						for (int start = 0; start < 256; start++) {
 		
@@ -120,10 +131,38 @@ public class Adversary {
 									
 									
 									
-									dc = SPAN.decrypt_shuffled(recomp, fakekey);
+									//dc = SPAN.decrypt_shuffled(recomp, fakekey);
 									//System.out.println("ORIGINAL CIPHER KEY > " + originalcipherkey);
 									//System.out.println("START > " + crypttokens[2]);
 									//System.out.println("START > " + crypttokens[2]);
+									
+									/*
+									 * UNBLOCK THREAD IF WE TIMEOUT FOR BAD KEY
+									 */
+									dc = null;
+									
+									final String rc = recomp, rf = fakekey;
+									ExecutorService executor = Executors.newCachedThreadPool();
+									Callable<Object> task = new Callable<Object>() {
+									   public String call() {
+									      return SPAN.decrypt_shuffled(rc, rf);
+									   }
+									};
+									
+									Future<Object> future = executor.submit(task);
+									
+									try {
+									   Object result = future.get(bad_crypt_timeout, TimeUnit.SECONDS); 
+									   dc = (String) result;
+									} catch (TimeoutException ex) {
+									   // handle the timeout
+									} catch (InterruptedException e) {
+									   // handle the interrupts
+									} catch (ExecutionException e) {
+									   // handle other exceptions
+									} finally {
+									   future.cancel(true); // may or may not desire this
+									}
 									
 									if (dc != null) {
 										
@@ -134,9 +173,9 @@ public class Adversary {
 										}
 										
 										if (fakekey.equals(originalcipherkey)) {
-											System.out.println("Found...");
+											//System.out.println("Found...");
 											keys.add(fakekey);
-											System.exit(1);
+											//System.exit(1);
 										}
 										
 										if (aPhraseInMyDict(dc)) {
@@ -147,43 +186,73 @@ public class Adversary {
 											
 											
 										} else {
-											System.out.println("FAKEKEY\t" + fakekey + " FAILED >> INCORRECT\n\t" + dc + "'");
-											System.out.println("REAL\t" + pair[1][0]);
+											//System.out.println("FAKEKEY\t" + fakekey + " FAILED >> INCORRECT\n\t" + dc + "'");
+											//System.out.println("REAL\t" + pair[1][0]);
+											System.out.println(dc);
 										}
 									} else {
-										System.out.println("FAKEKEY\t" + fakekey + " FAILED >> INCORRECT\n\t" + dc + "'");
-										System.out.println("REAL\t" + pair[1][0]);
+										//System.out.println("FAKEKEY\t" + fakekey + " FAILED >> INCORRECT\n\t" + dc + "'");
+										System.out.println("NULL! > " + dc + ", BAD KEY");
+										//blocksize..out.println("REAL\t" + pair[1][0]);
+										dcnull = true;
 									}
 									
-									foutstrings.append("CIPHER: " + recomp + "\nKEY: " + fakekey + "\nDECRYPT:" + dc + "\n");
-									fout.append(dc + "\n");
+									
 								
 								} catch (Exception e) {
 									System.out.println("FAKEKEY " + fakekey + " FAILED >> BROKEN BLOCK");
+									
 								}
 								
-								//System.exit(0);
 								
-								for (String possiblekey : keys) {
+								if (dcnull == true) {
 									
-									System.out.println("\tPOSSIBLE DECRYPT > " + SPAN.decrypt_shuffled(recomp, possiblekey));
+									dc = null;
 									
-									System.out.println("\tOG > " + SPAN.decrypt_shuffled(recomp, originalcipherkey));
-									
-									
-									if (possiblekey.equals(keys.getLast())) {
-										try {
-											Thread.sleep(1000);
-										} catch (InterruptedException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
-										//System.exit(1);
-										return;
+									try {
+										foutstrings.append("CIPHER: " + recomp + "\nKEY: " + fakekey + "\nDECRYPT:" + dc + "\n");
+										fout.append(dc + "\n");
+										fout.flush();
+										foutstrings.flush();
+									} catch (Exception e) {
+										System.out.println("WRITERROR");
+										System.exit(-1);;
 									}
 									
+									
+									//System.exit(0);
+									
+									for (String possiblekey : keys) {
+										
+										System.out.println("\tPOSSIBLE DECRYPT > " + SPAN.decrypt_shuffled(recomp, possiblekey));
+										
+										System.out.println("\tOG > " + SPAN.decrypt_shuffled(recomp, originalcipherkey));
+										
+										try {
+											foutstrings.append("\n" + SPAN.decrypt_shuffled(recomp, possiblekey));
+											fout.append("\n" + SPAN.decrypt_shuffled(recomp, possiblekey) + "\n");
+										} catch (Exception e) {
+											System.out.println(e);
+											System.exit(-100);
+										}
+										
+										
+										if (possiblekey.equals(keys.getLast())) {
+											
+											try {
+												foutstrings.close();
+												fout.close();
+											} catch (Exception e) {
+												
+											}
+											
+											//System.exit(1);
+											return new String[] {recomp, possiblekey};
+										}
+										
+									}
+									dcnull = false;
 								}
-								
 						
 							}
 							
@@ -193,6 +262,8 @@ public class Adversary {
 			}
 
 		}
+		
+		return null; //TODO Change later
 	}
 	
 	public static void useWrongKeyForPlaintext(String to_encrypt) {
@@ -266,8 +337,16 @@ public class Adversary {
 		
 		//useWrongKeyForPlaintext("Let's Test This!");
 		
-		bruteforceSim(BRUTEFORCE_SIM_STR);
+		String dcfind[] = bruteforceSim(BRUTEFORCE_SIM_STR);
 		
+		String cracked = SPAN.decrypt_shuffled(dcfind[0], dcfind[1]);
+		
+		try {
+			FileWriter tt = new FileWriter("brutestringslog.txt", true);
+			tt.write(cracked);
+			tt = new FileWriter("brutestringsonlylog.txt", true);
+			tt.write(cracked);
+		} catch (Exception e) {}
 		//useWrongKeyForPlaintext(BRUTEFORCE_SIM_STR);
 		//useWrongKeyForPlaintext();
 	}
