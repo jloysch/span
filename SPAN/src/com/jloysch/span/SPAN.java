@@ -125,7 +125,7 @@ public class SPAN {
 	 * @return (Float) a degree in the range (0, 90f)
 	 */
 	
-	private static float generate_some_degree() {
+	public static float generate_some_degree() {
 		
 		float num = (float) 100.0; //def
 		
@@ -308,17 +308,30 @@ public class SPAN {
 	
 	
 	/**
-	 * [Internal Method] encrypt_shuffled
+	 * [External Method] encrypt()
+	 * @param phrase The phrase to encrypt.
+	 * @param ratio The ratio at which to operate at.
+	 * @param writetofile Write locally to file?
+	 * @return Return[0] = String[0] of blocks, Return[1] = key
+	 */
+	public static String[][] encrypt(String phrase, float ratio, boolean writetofile) {
+		return encrypt_shuffled(phrase, ratio, writetofile);
+	}
+	
+	/**
+	 * [Internal Method] encrypt_shuffled()
 	 * @param phrase (String) The phrase which to encrypt.
 	 * @param ratio (Float) The ratio at which to encrypt it.
 	 * @param writetofile (Boolean) write locally to file. *DEBUG PUROSES.*
 	 * @return String[][] where encrypt[0] are the (String[]) Blocks, encrypt[1][0] is the (String) Key.
 	 */
 	
-	public static String[][] encrypt_shuffled(String phrase, float ratio, boolean writetofile) {
+	private static String[][] encrypt_shuffled(String phrase, float ratio, boolean writetofile) {
 		boolean ok = false;
 		
 		final int blocksize = 8; //TODO CHECK IMPLEMENTATIONS
+		
+		
 		
 		while (!ok) { //TODO Code cleanup
 			
@@ -436,7 +449,7 @@ public class SPAN {
 	 * @return (String[]) The cipher and key where return[0] = cipher and return[1] = key.
 	 */
 	
-	public static String[] encrypt(String phrase, float ratio, int blocksize, boolean writetofile) {
+	private static String[] encrypt(String phrase, float ratio, int blocksize, boolean writetofile) {
 		String[] pair = new String[2];
 		
 		/*
@@ -444,6 +457,8 @@ public class SPAN {
 		 */
 		
 		blocksize = 8; //TODO ADDRESS
+		
+		
 		
 		/*
 		 * TODO FIX BLOCKSIZE FIX FOR ENCRYPTION!
@@ -1732,7 +1747,7 @@ public class SPAN {
 	 */
 	
 	/**
-	 * [External Method] encrypt_bins
+	 * [External Method] encrypt_bins()
 	 * Encrypt a String[] of binary
 	 * @param bins (String[]) The String[] of binary to encrypt.
 	 * @param blocksize (Integer) 8** WILL ADDRESS IN FUTURE VERSION!
@@ -1740,7 +1755,7 @@ public class SPAN {
 	 * @return (String[]) where return[0] = (String) cipher, and return[1] = (Float) angle.
 	 */
 	
-	public static String[] encrypt_bins(String[] bins, int blocksize, float TRI_RATIO) { //TODO FIXUP CLEANUP
+	private static String[] encrypt_bins(String[] bins, int blocksize, float TRI_RATIO) { //TODO FIXUP CLEANUP
 		
 		boolean verified = false;
 		String bigcrypt = "";
@@ -1785,7 +1800,14 @@ public class SPAN {
 					//bigcryptasarray[stepct] = (String) vals.get(0);
 				}
 				
+				//stepct++;
 				
+				/*
+				 * TODO - MASSIVE! INCREMENT DEGREE OF DEGREE
+				 * 
+				 * HARDER IMPLEMENTATION BUT MORE SECURE AND HOW I INTENDED
+				 * 
+				 */
 			}
 			
 			String[] dec = decrypt_string((String) vals.get(0), blocksize, TRI_RATIO, startangle);
