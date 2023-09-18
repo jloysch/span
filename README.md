@@ -63,7 +63,7 @@ I have an algorithm to see how many unique generations there are for a particula
 There is about a 1 in 4 chance of finding a block that will work so the algorithm runs until it verifies the block and returns it to you (about 4 times max per legitamate generation)
 
 
-When you brute force the block in SPAN, you get triangles!
+When you brute force the block in SPAN, you get triangles! SEE SPAN/BRUTESTRINGS.txt
 
 BRUTE FORCE OUTPUT >
 
