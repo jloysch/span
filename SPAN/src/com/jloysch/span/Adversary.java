@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -21,15 +22,16 @@ public class Adversary {
 		return (BRUTEFORCE_SIM_STR.equals(phrase));
 	}
 	
-	static int bad_crypt_timeout = 1;
+	static int bad_crypt_timeout = 100;
 	
 	public static String[] bruteforceSim(String intended_phrase) {
 		boolean cracked = false;
 		
 		String phrase = intended_phrase;
 		
-		String[][] pair = SPAN.encrypt(phrase, (float) 0.888, false); //TODO Allow doubles in and cast in-method
+		String[][] pair = SPAN.encrypt(phrase, (float) 13.49744319, false); //TODO Allow doubles in and cast in-method (Use between .5 - 21.49744319) exclusive
 		
+		System.out.println("ENCRYPTED");
 		
 		String originalcipherkey = pair[1][0];
 		
@@ -90,19 +92,19 @@ public class Adversary {
 			
 			
 			
-			final boolean helpkey = false; //IF HELP KEY IS TURNED OFF THE PROGRAM FREEZES, SOME BAD KEYS WILL CAUSE THE PROGRAM TO FREEZE!
+			final boolean helpkey = true; //IF HELP KEY IS TURNED OFF THE PROGRAM FREEZES, SOME BAD KEYS WILL CAUSE THE PROGRAM TO FREEZE!
 			
 			float helpdoffset = 0f;
 			float helproffset = 0.001f;
 			
-			boolean dcnull = false;
+		
 			LinkedList<String> keys = new LinkedList<String>();
 			//originalcipherkey += "\\";
 			for (int blocksize = 8; blocksize < 12; blocksize++) {
 				
-				for (float degree = helpkey ? 0f : 0.f ; degree < 99.999999f; degree+=0.000001f) {
-				
-					for (float ratio = helpkey ? 0f : .1f ; ratio < 1.0f; ratio+=0.001f) {
+				for (float degree = helpkey ? 0f : 1f; degree < 90f; degree+=.0000001f) {
+					
+					for (float ratio = helpkey ? 0f : 0.5f ; ratio < 1.0f; ratio+=0.001f) { //.5 - 21.49744319
 				
 						for (int start = 0; start < 256; start++) {
 		
@@ -119,15 +121,18 @@ public class Adversary {
 								if (!helpkey) fakekey = prefix + degree + "D" + ratio + "R" + start + "S" + finish + "F" + postfix;
 								
 								System.out.println("\t" + fakekey);
+								System.out.println("\t" + pair[1][0]);
+								
 								
 								//System.out.println("KEY > " + fakekey);
 								
 								//System.out.println("CIPHER | " + recomp);
+								dc = null;
 								
 								try {
 									
 									
-									//dc = SPAN.decrypt(recomp, fakekey);
+									dc = SPAN.decrypt_shuffled(recomp, fakekey);
 									
 									
 									
@@ -139,10 +144,12 @@ public class Adversary {
 									/*
 									 * UNBLOCK THREAD IF WE TIMEOUT FOR BAD KEY
 									 */
-									dc = null;
+									//dc = null;
 									
 									final String rc = recomp, rf = fakekey;
-									ExecutorService executor = Executors.newCachedThreadPool();
+									
+									/*
+									ExecutorService executor = Executors.newSingleThreadExecutor();
 									Callable<Object> task = new Callable<Object>() {
 									   public String call() {
 									      return SPAN.decrypt_shuffled(rc, rf);
@@ -150,34 +157,43 @@ public class Adversary {
 									};
 									
 									Future<Object> future = executor.submit(task);
-									
+									executor.shutdownNow();
 									try {
-									   Object result = future.get(bad_crypt_timeout, TimeUnit.SECONDS); 
+									   Object result = future.get(bad_crypt_timeout, TimeUnit.MILLISECONDS); 
 									   dc = (String) result;
 									} catch (TimeoutException ex) {
+										dc = null;
 									   // handle the timeout
 									} catch (InterruptedException e) {
+										dc = null;
 									   // handle the interrupts
 									} catch (ExecutionException e) {
+										dc = null;
 									   // handle other exceptions
 									} finally {
 									   future.cancel(true); // may or may not desire this
+									   executor.shutdownNow();
+									   dc = null;
+									   
 									}
 									
-									if (dc != null) {
+									Thread.sleep(bad_crypt_timeout + 1); //keep thread sync
+									
+									*/
+									
+									//dc = SPAN.decrypt_shuffled(rc, rf);
+									
+									//dc = SPAN.decrypt(recomp, fakekey);
+								
 										
-										if ((start == crypttokens[2]) && (finish == crypttokens[3])) {
-											System.out.println("FOUND!");
-											//System.exit(100);
-											
-										}
-										
+										/*
 										if (fakekey.equals(originalcipherkey)) {
-											//System.out.println("Found...");
+											System.out.println("Found...");
 											keys.add(fakekey);
-											//System.exit(1);
+											System.exit(1);
 										}
-										
+										*/
+									
 										if (aPhraseInMyDict(dc)) {
 											System.out.println("FOUND IN DICT!");
 											//System.exit(100);
@@ -190,12 +206,6 @@ public class Adversary {
 											//System.out.println("REAL\t" + pair[1][0]);
 											System.out.println(dc);
 										}
-									} else {
-										//System.out.println("FAKEKEY\t" + fakekey + " FAILED >> INCORRECT\n\t" + dc + "'");
-										System.out.println("NULL! > " + dc + ", BAD KEY");
-										//blocksize..out.println("REAL\t" + pair[1][0]);
-										dcnull = true;
-									}
 									
 									
 								
@@ -205,9 +215,9 @@ public class Adversary {
 								}
 								
 								
-								if (dcnull == true) {
+								
 									
-									dc = null;
+									//dc = null;
 									
 									try {
 										foutstrings.append("CIPHER: " + recomp + "\nKEY: " + fakekey + "\nDECRYPT:" + dc + "\n");
@@ -215,8 +225,8 @@ public class Adversary {
 										fout.flush();
 										foutstrings.flush();
 									} catch (Exception e) {
-										System.out.println("WRITERROR");
-										System.exit(-1);;
+										System.out.println("WRITERROR (NULL)");
+										//System.exit(-1);;
 									}
 									
 									
@@ -229,8 +239,8 @@ public class Adversary {
 										System.out.println("\tOG > " + SPAN.decrypt_shuffled(recomp, originalcipherkey));
 										
 										try {
-											foutstrings.append("\n" + SPAN.decrypt_shuffled(recomp, possiblekey));
-											fout.append("\n" + SPAN.decrypt_shuffled(recomp, possiblekey) + "\n");
+											foutstrings.append("\n" + dc);
+											fout.append("\n" + dc + "\n");
 										} catch (Exception e) {
 											System.out.println(e);
 											System.exit(-100);
@@ -251,10 +261,10 @@ public class Adversary {
 										}
 										
 									}
-									dcnull = false;
+									
 								}
 						
-							}
+							
 							
 						}
 					}
